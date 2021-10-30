@@ -39,7 +39,9 @@
     \node (media) at (3, 5) [entity] {Media} edge (isa);
     \node (url) [attribute, left=of media] {\underline{url}}
         edge (media);
-    \node (caption) [attribute, right=of media] {caption}
+    \node (caption) at (6, 5.5) [attribute] {caption}
+        edge (media);
+    \node (date added) at (6, 4.5) [attribute] {date\_added}
         edge (media);
 
     \node (contains) at (3, 6.5) [relationship, aspect=2] {contains}
@@ -68,7 +70,7 @@
         child foreach \mytext in {\underline{group\_id}, name}
             {node [attribute] {\mytext}};
     \node (moderates) at (0, 12) [relationship, aspect=2] {moderates};
-    \draw [<-, very thick] (moderates) |- (groups);
+    \draw [very thick] (moderates) |- (groups);
     \draw (moderates) |- (users);
 
     \node (member of) at (6, 12) [relationship, aspect=2] {member of};
@@ -142,25 +144,26 @@ CREATE TABLE TenantFriends (
     \end{enumerate}
     \item
     \begin{enumerate}
-        \item List \texttt{athlete\_id} of athletes who have participated in all events that Usain Bolt (\texttt{athlete\_id} A5) participated in.
+        \item List \texttt{athlete\_id} of athletes who have won medals in all events that Usain Bolt (\texttt{athlete\_id} A5) also won a medal in.
         \item 1 column: \texttt{athlete\_id}.
-        \item 1 tuple.
+        \item 2 tuples.
         \item 
         \begin{tabular}{@{}l@{}}
             \toprule
             \texttt{athlete\_id} \\ \midrule
-            A4          \\ \bottomrule
+            A4          \\
+            A5          \\ \bottomrule
         \end{tabular}
     \end{enumerate}
     \item
     \begin{enumerate}
         \item List \texttt{athlete\_id} of athletes who win at most one type of medals.
-        \item 1 column: \texttt{athlete\_id}.
+        \item 1 column: \texttt{A.athlete\_id}.
         \item 9 tuples.
         \item 
         \begin{tabular}{@{}l@{}}
             \toprule
-            \texttt{athlete\_id} \\ \midrule
+            \texttt{A.athlete\_id} \\ \midrule
             A1          \\
             A2          \\
             A3          \\
@@ -180,7 +183,7 @@ CREATE TABLE TenantFriends (
 \begin{enumerate}
     \item
     \begin{enumerate}
-        \item Find \texttt{event\_id} of events that A4 participated in.
+        \item Find \texttt{event\_id} of events that A4 won a medal in.
         \item 1 column: \texttt{event\_id}.
         \item 2 tuples.
         \item 
@@ -193,7 +196,7 @@ CREATE TABLE TenantFriends (
     \end{enumerate}
 
     \item \begin{enumerate}
-        \item Find \texttt{athlete\_id} of athletes who participated in more than one event.
+        \item Find \texttt{athlete\_id} of athletes who won more than one medal.
         \item 1 column: \texttt{athlete\_id}.
         \item 5 tuples.
         \item
@@ -242,7 +245,7 @@ CREATE TABLE TenantFriends (
 
     \item
     \begin{enumerate}
-        \item Find athletes who are oldest in among athletes from their country.
+        \item List the \texttt{country}, \texttt{name} and \texttt{age} of oldest athletes for every country.
         \item 3 columns: \texttt{country}, \texttt{name}, \texttt{age}.
         \item 6 tuples.
         \item
