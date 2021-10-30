@@ -4,6 +4,11 @@
 \usetikzlibrary{shapes.geometric,er,positioning}
 
 \usepackage{minted}
+\usepackage{booktabs}
+
+\usepackage{enumitem}
+\setlist[enumerate, 1]{label=(\alph*)}
+\setlist[enumerate, 2]{label=\roman*.}
 
 \title{
     15-415/615 - Database Applications
@@ -112,5 +117,146 @@ CREATE TABLE TenantFriends (
         ON DELETE CASCADE
 )
 \end{minted}
+
+\newpage
+
+\section*{Question 3: Relational Algebra}
+
+\begin{enumerate}
+    \item 2
+    \item 1--3
+    \item
+    \begin{enumerate}
+        \item List all attributes of athletes whose are less than 25 years old and the outcome of their events.
+        \item 6 columns: \texttt{athlete\_id}, \texttt{country}, \texttt{name}, \texttt{age}, \texttt{event\_id}, \texttt{result}.
+        \item 4 tuples.
+        \item
+        \begin{tabular}{@{}llllll@{}}
+            \toprule
+            \texttt{athlete\_id} & \texttt{country} & \texttt{name}            & \texttt{age} & \texttt{event\_id} & \texttt{result} \\ \midrule
+            A4          & Canada  & Andre De Grasse & 21  & E1        & Bronze \\
+            A4          & Canada  & Andre De Grasse & 21  & E2        & Silver \\
+            A7          & Japan   & Masato Sakai    & 24  & E3        & Silver \\
+            A7          & Japan   & Masato Sakai    & 24  & E4        & Silver \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+    \item
+    \begin{enumerate}
+        \item List \texttt{athlete\_id} of athletes who have participated in all events that Usain Bolt (\texttt{athlete\_id} A5) participated in.
+        \item 1 column: \texttt{athlete\_id}.
+        \item 1 tuple.
+        \item 
+        \begin{tabular}{@{}l@{}}
+            \toprule
+            \texttt{athlete\_id} \\ \midrule
+            A4          \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+    \item
+    \begin{enumerate}
+        \item List \texttt{athlete\_id} of athletes who win at most one type of medals.
+        \item 1 column: \texttt{athlete\_id}.
+        \item 9 tuples.
+        \item 
+        \begin{tabular}{@{}l@{}}
+            \toprule
+            \texttt{athlete\_id} \\ \midrule
+            A1          \\
+            A2          \\
+            A3          \\
+            A5          \\
+            A6          \\
+            A7          \\
+            A8          \\
+            A9          \\
+            A10         \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+\end{enumerate}
+\newpage
+
+\section*{Question 4: Relational Tuple Calculus (RTC)}
+
+\begin{enumerate}
+    \item
+    \begin{enumerate}
+        \item Find \texttt{event\_id} of events that A4 participated in.
+        \item 1 column: \texttt{event\_id}.
+        \item 2 tuples.
+        \item 
+        \begin{tabular}{@{}l@{}}
+            \toprule
+            \texttt{event\_id} \\ \midrule
+            E1          \\
+            E2          \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item Find \texttt{athlete\_id} of athletes who participated in more than one event.
+        \item 1 column: \texttt{athlete\_id}.
+        \item 5 tuples.
+        \item
+        \begin{tabular}{@{}l@{}}
+            \toprule
+            \texttt{athlete\_id} \\ \midrule
+            A1          \\
+            A4          \\
+            A5          \\
+            A7          \\
+            A9          \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+\end{enumerate}
+\newpage
+
+\section*{Question 5: Relational Domain Calculus (RDC)}
+
+\begin{enumerate}
+    \item
+    \begin{enumerate}
+        \item Find the names of athletes at least 35 years old.
+        \item 1 column: \texttt{name}.
+        \item 2 tuples.
+        \item 
+        \begin{tabular}{@{}l@{}}
+            \toprule
+            \texttt{name} \\ \midrule
+            Naito Ehara   \\
+            Duncan Scott  \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+
+    \item
+    \begin{enumerate}
+        \item Find the names of events where Canadian athletes won silver medals.
+        \item 1 column: \texttt{name}.
+        \item 1 tuple.
+        \item
+        \begin{tabular}{@{}l@{}}
+            \toprule
+            \texttt{name} \\ \midrule
+            200m Sprint   \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+
+    \item
+    \begin{enumerate}
+        \item Find athletes who are oldest in among athletes from their country.
+        \item 3 columns: \texttt{country}, \texttt{name}, \texttt{age}.
+        \item 6 tuples.
+        \item
+        \begin{tabular}{@{}lll@{}}
+            \toprule
+            \texttt{country} & \texttt{name}       & \texttt{age} \\ \midrule
+            U.S.A.           & Justin Gatlin       & 34           \\
+            Canada           & Andre De Grasse     & 21           \\
+            Jamaica          & Usain Bolt          & 30           \\
+            France           & Christophe Lemaitre & 26           \\
+            Japan            & Naito Ehara         & 60           \\
+            GBR              & Duncan Scott        & 35           \\ \bottomrule
+        \end{tabular}
+    \end{enumerate}
+\end{enumerate}
 
 \end{document}
