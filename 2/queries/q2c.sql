@@ -3,7 +3,7 @@ SELECT station_name, date, events FROM
             *,
             rank() OVER (
                 PARTITION BY station_id
-                ORDER BY count DESC, date
+                ORDER BY count, date
             ) AS rank
         FROM (
             SELECT
@@ -12,7 +12,7 @@ SELECT station_name, date, events FROM
                 count(*) AS count
             FROM trip GROUP BY date, station_id
         ) AS t) AS u
-        JOIN station USING (station_id)
-        JOIN weather USING (date)
-    WHERE rank = 1 AND events <> ''
+        NATURAL JOIN station
+        NATURAL JOIN weather
+    WHERE rank = 1 AND events IS NOT NULL
     ORDER BY station_name;
