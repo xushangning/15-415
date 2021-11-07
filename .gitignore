@@ -1,5 +1,9 @@
 .DS_Store
 
+.idea/
+/3/Datafiles/
+*.o
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
