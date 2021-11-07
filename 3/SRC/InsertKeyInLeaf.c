@@ -13,7 +13,7 @@
 
 #include "def.h"
 
-extern int UpdatePostingsFile(POSTINGSPTR *pPostOffset, TEXTPTR NewTextOffset);
+extern void UpdatePostingsFile(POSTINGSPTR *pPostOffset, TEXTPTR NewTextOffset);
 extern int FreePage(struct PageHdr *PagePtr);
 extern int FlushPage(struct PageHdr *PagePtr);
 extern int CreatePosting(TEXTPTR TextOffset, POSTINGSPTR *pPostOffset);
