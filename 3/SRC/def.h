@@ -87,3 +87,5 @@ struct upKey {
 	PAGENO		right;	/* right page, with keys > */
 	char *		key;
 };
+
+struct upKey *SplitPage(struct PageHdr * PagePtr);

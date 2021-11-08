@@ -28,7 +28,7 @@ struct upKey *InsertKeyInNonLeaf(struct PageHdr *PagePtr,
     int FindInsertionPosition(struct KeyRecord * KeyListTraverser, char *Key,
                               int *Found, NUMKEYS NumKeys, int Count);
     char *Word; /* Key stored in B-Tree */
-    struct upKey *newUpKey, *SplitPage(struct PageHdr * PagePtr);
+    struct upKey *newUpKey;
     char *strsave(char *s);
 
     if (MiddleKey == NULL) { /* just free the page-image */

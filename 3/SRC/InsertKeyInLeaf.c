@@ -28,7 +28,7 @@ struct upKey *InsertKeyInLeaf(struct PageHdr *PagePtr, char *Key,
     int InsertionPosition, /* Position for insertion */
         Count, Found, i;
     POSTINGSPTR PostOffset;
-    struct upKey *MiddleKey, *SplitPage(struct PageHdr * PagePtr);
+    struct upKey *MiddleKey;
     int FindInsertionPosition(struct KeyRecord * KeyListTraverser, char *Key,
                               int *Found, NUMKEYS NumKeys, int Count);
     char *strsave(char *s);
