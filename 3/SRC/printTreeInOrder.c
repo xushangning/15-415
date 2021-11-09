@@ -31,4 +31,6 @@ void PrintTreeInOrder(PAGENO pgNum, int level) {
         }
         printf("(%d) \n", count);
     }
+
+    FreePage(p);
 }

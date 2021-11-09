@@ -30,6 +30,7 @@ NUMKEYS subtreeKeyCount(PAGENO pgNum) {
         left = FetchPage(pgNum);
     }
     FreePage(left);
+    FreePage(right);
 
     return count;
 }
