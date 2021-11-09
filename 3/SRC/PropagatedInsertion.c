@@ -35,7 +35,6 @@ struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key,
 
     struct KeyRecord *KeyListTraverser; /* Pointer to list of keys */
     struct PageHdr *PagePtr;
-    struct PageHdr *FetchPage(PAGENO Page);
 
     PagePtr = FetchPage(PageNo);
 

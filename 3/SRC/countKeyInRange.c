@@ -7,7 +7,6 @@ extern int FindInsertionPosition(struct KeyRecord *KeyListTraverser, char *Key,
 extern PAGENO FindPageNumOfChild(struct PageHdr *PagePtr,
                                  struct KeyRecord *KeyListTraverser, char *Key,
                                  NUMKEYS NumKeys);
-extern struct PageHdr *FetchPage(PAGENO Page);
 extern int strtolow(char *s);
 
 NUMKEYS countKeyInRange(char *leftKey, char *rightKey) {

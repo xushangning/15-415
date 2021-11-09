@@ -13,7 +13,6 @@ extern POSTINGSPTR searchLeaf(struct PageHdr *PagePtr, char *key);
 extern PAGENO FindPageNumOfChild(struct PageHdr *PagePtr,
                                  struct KeyRecord *KeyListTraverser, char *Key,
                                  NUMKEYS NumKeys);
-extern struct PageHdr *FetchPage(PAGENO Page);
 
 /**
  * recursive call to find the page in which the key should reside

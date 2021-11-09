@@ -17,7 +17,6 @@ extern void FlushPage(struct PageHdr *PagePtr);
 void SplitRoot(PAGENO RootPageNum, struct upKey *upKeyPtr) {
     struct PageHdr *PagePtr, /* Pointer to page (Root) being split */
         *NewPagePtr;         /* Pointer to newly created page */
-    struct PageHdr *FetchPage(PAGENO Page);
     struct KeyRecord *middleKey; /* holds the node for the key  */
     /* that will be the only key of the new root */
     char *strsave(char *s);

@@ -3,7 +3,6 @@
 void PrintTreeInOrder(PAGENO pgNum, int level) {
     struct PageHdr *p;
     struct KeyRecord *k;
-    struct PageHdr *FetchPage(PAGENO Page); // add this line to avoid seg-fault
     int i;
 
     p = (struct PageHdr *) FetchPage(pgNum);

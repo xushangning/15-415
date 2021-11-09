@@ -12,7 +12,7 @@ typedef void (*RecordVisitor)(struct KeyRecord *);
 extern void scanLeaf(struct PageHdr *p, RecordVisitor f);
 
 void scanTree(RecordVisitor f) {
-    struct PageHdr *FetchPage(PAGENO Page), *p, *tempp;
+    struct PageHdr *p, *tempp;
 
     p = FetchPage(ROOT);
 

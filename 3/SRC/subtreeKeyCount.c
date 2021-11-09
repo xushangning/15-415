@@ -1,7 +1,5 @@
 #include "def.h"
 
-extern struct PageHdr *FetchPage(PAGENO Page);
-
 NUMKEYS subtreeKeyCount(PAGENO pgNum) {
     struct PageHdr *left, *right;
     PAGENO root = pgNum;

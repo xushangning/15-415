@@ -141,5 +141,6 @@ struct upKey {
 	char *		key;
 };
 
+struct PageHdr *FetchPage(PAGENO Page);
 struct upKey *SplitPage(struct PageHdr * PagePtr);
 void FreePage(struct PageHdr *PagePtr);
