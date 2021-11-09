@@ -12,7 +12,6 @@
 
 #include "def.h"
 
-extern int FreePage(struct PageHdr *PagePtr);
 extern int FlushPage(struct PageHdr *PagePtr);
 extern int fillIn(struct PageHdr *PagePtr);
 

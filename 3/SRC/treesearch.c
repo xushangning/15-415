@@ -10,7 +10,6 @@
 #include "def.h"
 
 extern POSTINGSPTR searchLeaf(struct PageHdr *PagePtr, char *key);
-extern int FreePage(struct PageHdr *PagePtr);
 extern PAGENO FindPageNumOfChild(struct PageHdr *PagePtr,
                                  struct KeyRecord *KeyListTraverser, char *Key,
                                  NUMKEYS NumKeys);

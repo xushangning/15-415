@@ -94,3 +94,4 @@ struct upKey {
 };
 
 struct upKey *SplitPage(struct PageHdr * PagePtr);
+void FreePage(struct PageHdr *PagePtr);

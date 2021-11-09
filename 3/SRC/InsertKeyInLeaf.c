@@ -14,7 +14,6 @@
 #include "def.h"
 
 extern void UpdatePostingsFile(POSTINGSPTR *pPostOffset, TEXTPTR NewTextOffset);
-extern int FreePage(struct PageHdr *PagePtr);
 extern int FlushPage(struct PageHdr *PagePtr);
 extern int CreatePosting(TEXTPTR TextOffset, POSTINGSPTR *pPostOffset);
 extern int fillIn(struct PageHdr *PagePtr);

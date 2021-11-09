@@ -3,7 +3,6 @@ extern FILE *fpbtree;
 extern int btWriteCount; /* counts the number of b-tree page writes */
 
 extern int fillIn(struct PageHdr *PagePtr);
-extern void FreePage(struct PageHdr *PagePtr);
 
 /**
  * This function writes a page to disk and then calls function FreePage to

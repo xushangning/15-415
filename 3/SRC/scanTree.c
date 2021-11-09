@@ -9,7 +9,6 @@ extern FILE *fpbtree;
 
 typedef void (*RecordVisitor)(struct KeyRecord *);
 
-extern int FreePage(struct PageHdr *PagePtr);
 extern void scanLeaf(struct PageHdr *p, RecordVisitor f);
 
 void scanTree(RecordVisitor f) {
