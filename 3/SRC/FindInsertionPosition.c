@@ -20,9 +20,15 @@
 
 #include "def.h"
 
-/* KeyListTraverser: Pointer to the list of keys */
-/* Key: The new possible key */
-/* Found: report result */
+/**
+ * @param KeyListTraverser Pointer to the list of keys
+ * @param Key The new possible key
+ * @param Found report result
+ * @param NumKeys Number of keys in the list not compared
+ * @param Count Number of keys compared
+ * @return Insertion position, represented by an integer equal to the number of
+ * keys before the insertion position
+ */
 int FindInsertionPosition(struct KeyRecord *KeyListTraverser, char *Key,
                           int *Found, NUMKEYS NumKeys, int Count) {
     int Result;

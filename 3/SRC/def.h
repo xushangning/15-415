@@ -53,8 +53,13 @@ typedef long  NUMPTRS;     /* needed to make contiguous postings easier */
 
 struct PageHdr {
      char              PgTypeID;         /* 'N' for NonLeaf, 'L' for Leaf */
-     PAGENO           PgNum;            
-     PAGENO           PgNumOfNxtLfPg;   /* FOR LEAF PAGES ONLY */
+     PAGENO           PgNum;
+
+     /**
+      * Page number of next logical leaf page (LEAF PAGES ONLY)
+      */
+     PAGENO           PgNumOfNxtLfPg;
+
      NUMBYTES          NumBytes;
      NUMKEYS           NumKeys;          
      NUMKEYS            SubtreeKeyCount; /* THIS IS YOUR TASK :) */

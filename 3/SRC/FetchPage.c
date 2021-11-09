@@ -1,11 +1,5 @@
 /****************************************************************************
 *                                                                           *
-*     The function FetchPage reads a page from disk using the formula       *
-*     PageNum * PAGESIZE - PAGESIZE, e.g., if the PageNum = 3 and           *
-*     PAGESIZE = 1024, the B-Tree file will be accessed starting at         *
-*     offset 2048, wherein the first page would be stored at offset 0,      *
-*     and the second page at offset 1024.                                   *
-*                                                                           *
 *     FetchPage installs the page in the following structures:              *
 *                                                                           *
 *     The dynamically allocated page header structure:                      *
@@ -15,8 +9,7 @@
 *                                               Leaf or NonLeaf pages)      *
 *            PAGENO         PgNum;           (Page number within the       *
 *                                               B-Tree)                     *
-*            PAGENO         PgNumOfNxtLfPg;  (Page number of next logical  *
-*                                               leaf page (LEAF PAGES ONLY))*
+*            PAGENO         PgNumOfNxtLfPg;
 *            NUMBYES         NumBytes;        (Number of bytes stored       *
 *                                               within page)                *
 *            NUMKEYS         NumKeys;         (Number of keys stored        *
@@ -55,8 +48,17 @@
 extern FILE *fpbtree;
 extern int btReadCount; /* counts the number of b-tree page reads */
 
+/**
+ * The function FetchPage reads a page from disk using the formula
+ * PageNum * PAGESIZE - PAGESIZE, e.g., if the PageNum = 3 and
+ * PAGESIZE = 1024, the B-Tree file will be accessed starting at offset 2048,
+ * wherein the first page would be stored at offset 0, and the second page at
+ * offset 1024.
+ *
+ * @param Page Page number of page to be fetched
+ * @return
+ */
 struct PageHdr *FetchPage(PAGENO Page)
-/* Page number of page to be fetched */
 {
     struct PageHdr *PagePtr;
     struct KeyRecord *KeyNode,

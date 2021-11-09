@@ -1,22 +1,5 @@
 /* UpdatePostingsFile.c */
 /*  The function UpdatePostingsFile is passed two values:
-    a pointer to an offset in the postings file, and a offset value
-    referring to the textfile.  The routines get the record at the
-    postings file offset and checks to see if there is enough space for
-    another text offset.  If there is empty offset space available in the
-    same record, the number of text offsets in the record is incremented
-    and re-written to the record and the new text offset is added to the end
-    of the record.
-
-    If the current postings list is full, all the pointers are read into
-    memory, and the current record is added to a freelist of that size
-    record.  A freelist of every size record is kept by keeping the head
-    pointers in the first record of the file.
-
-    A new free record of the next largest size, if available, is retrieved
-    from the appropriate head pointer at the beginning of the file.  If there
-    is no block of the appropriate size, the new record is set up at the
-    end of the file.
 */
 
 #include <stdio.h>
@@ -29,6 +12,27 @@ extern int isfull(int count);
 extern void freerec(POSTINGSPTR pptr, long int size);
 extern POSTINGSPTR getrec(long int size);
 
+/**
+ * @details
+ * The routines get the record at the postings file offset and checks to see
+ * if there is enough space for another text offset.  If there is empty offset
+ * space available in the same record, the number of text offsets in the record
+ * is incremented and re-written to the record and the new text offset is added
+ * to the end of the record.
+ * @details
+ * If the current postings list is full, all the pointers are read into memory,
+ * and the current record is added to a freelist of that size record.  A
+ * freelist of every size record is kept by keeping the head pointers in the
+ * first record of the file.
+ * @details
+ * A new free record of the next largest size, if available, is retrieved from
+ * the appropriate head pointer at the beginning of the file.  If there is no
+ * block of the appropriate size, the new record is set up at the end of the
+ * file.
+ *
+ * @param pPostOffset Pointer to an offset in the postings file
+ * @param NewTextOffset Offset value referring to the textfile
+ */
 void UpdatePostingsFile(POSTINGSPTR *pPostOffset, TEXTPTR NewTextOffset) {
     TEXTPTR TextOffset;
     NUMPTRS NumTextOffsets;

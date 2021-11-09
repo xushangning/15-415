@@ -20,6 +20,12 @@ extern int iCount; /* counts the number of inserted words */
 extern int SplitRoot(PAGENO RootPageNum, struct upKey *upKeyPtr);
 extern struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key,
                                          TEXTPTR TextOffset);
+
+/**
+ * @param Key
+ * @param TextOffset Offset within TEXTFILE that indicates the start of the
+ * document that contains Key
+ */
 void InsertTree(char *Key, TEXTPTR TextOffset) {
     struct upKey *MiddleKey;
     KEYLEN keyLen;

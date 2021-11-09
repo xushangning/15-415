@@ -1,12 +1,10 @@
-/************************************************************************
-*                                                                       *
-*    This function frees the space that was dynamimcally secured to     *
-*    hold a disk page.                                                  *
-*                                                                       *
-************************************************************************/
-
 #include "def.h"
 
+/**
+ * This function frees the space that was dynamimcally secured to hold a disk page.
+ *
+ * @param PagePtr
+ */
 void FreePage(struct PageHdr *PagePtr) {
     struct KeyRecord *nextVictim, /* Pointer to the list of keys */
         *currentVictim;           /* Pointer to the list of keys */

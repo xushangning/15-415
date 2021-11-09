@@ -1,18 +1,3 @@
-
-/*************************************************************************
-*                                                                        *
-*    This function writes a page to disk and then calls function         *
-*    FreePage to free the storage space that was allocated to the       *
-*    dynamic data structures.                                            *
-*                                                                        *
-*    The size of the page, PAGESIZE, is locked-in when the page is       *
-*    written to disk.  This is handled by the padding of character       *
-*    zero's, e.g., if PAGESIZE = x and the number of bytes that are      *
-*    stored in the page is NumBytes = n, there will be (x - n)           *
-*    character byte zero's written to disk.                              *
-*                                                                        *
-*************************************************************************/
-
 #include "def.h"
 extern FILE *fpbtree;
 extern int btWriteCount; /* counts the number of b-tree page writes */
@@ -20,6 +5,18 @@ extern int btWriteCount; /* counts the number of b-tree page writes */
 extern int fillIn(struct PageHdr *PagePtr);
 extern void FreePage(struct PageHdr *PagePtr);
 
+/**
+ * This function writes a page to disk and then calls function FreePage to
+ * free the storage space that was allocated to the dynamic data structures.
+ *
+ * @details
+ * The size of the page, PAGESIZE, is locked-in when the page is written to
+ * disk.  This is handled by the padding of character zero's, e.g., if
+ * PAGESIZE = x and the number of bytes that are stored in the page is
+ * NumBytes = n, there will be (x - n) character byte zero's written to disk.
+ *
+ * @param PagePtr
+ */
 void FlushPage(struct PageHdr *PagePtr) {
     struct KeyRecord *KeyListTraverser; /* A pointer to the list of keys */
     int i;
