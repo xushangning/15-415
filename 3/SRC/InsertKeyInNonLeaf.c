@@ -12,7 +12,6 @@
 
 #include "def.h"
 
-extern int FlushPage(struct PageHdr *PagePtr);
 extern int fillIn(struct PageHdr *PagePtr);
 
 struct upKey *InsertKeyInNonLeaf(struct PageHdr *PagePtr,

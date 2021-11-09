@@ -12,7 +12,7 @@
 
 #include <stdio.h>
 #include "defn.g"
-#include <stdlib.h>   
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <stdbool.h>
@@ -144,3 +144,4 @@ struct upKey {
 struct PageHdr *FetchPage(PAGENO Page);
 struct upKey *SplitPage(struct PageHdr * PagePtr);
 void FreePage(struct PageHdr *PagePtr);
+void FlushPage(struct PageHdr *PagePtr);

@@ -12,8 +12,6 @@
 
 extern FILE *fpbtree;
 
-extern void FlushPage(struct PageHdr *PagePtr);
-
 void CreateRoot(void) {
     struct PageHdr *PagePtr;
 

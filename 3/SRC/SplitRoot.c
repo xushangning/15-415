@@ -11,8 +11,6 @@
 
 #include "def.h"
 
-extern void FlushPage(struct PageHdr *PagePtr);
-
 /* upKeyPtr: Key to be inserted */
 void SplitRoot(PAGENO RootPageNum, struct upKey *upKeyPtr) {
     struct PageHdr *PagePtr, /* Pointer to page (Root) being split */

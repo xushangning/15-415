@@ -15,8 +15,6 @@
 
 #include "def.h"
 
-extern int FlushPage(struct PageHdr *PagePtr);
-
 struct upKey *SplitPage(struct PageHdr *PagePtr) {
     int i;
     NUMKEYS FirstHalfNumKeys;
