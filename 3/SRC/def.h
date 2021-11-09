@@ -15,6 +15,7 @@
 #include <stdlib.h>   
 #include <string.h>
 #include <assert.h>
+#include <stdbool.h>
 
 extern int PAGESIZE;	/* Size of page (in bytes) to be stored on disk  */
 extern int MAXTEXTPTRS;	/* POSTINGSFILE stores so many ptrs,
