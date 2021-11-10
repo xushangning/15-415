@@ -152,3 +152,5 @@ struct upKey *InsertKeyInLeaf(struct PageHdr * PagePtr, char *Key,
                               TEXTPTR TextOffset);
 struct upKey *InsertKeyInNonLeaf(struct PageHdr * PagePtr, struct upKey * MiddleKey);
 struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key, TEXTPTR TextOffset);
+
+NUMKEYS subtreeKeyCount(PAGENO root);

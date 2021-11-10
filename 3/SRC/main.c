@@ -40,7 +40,6 @@ extern int check_word(char *word);
 extern void reset_stats();
 
 extern void orderedInsert(char *fname);
-extern NUMKEYS subtreeKeyCount(PAGENO pgNum);
 extern NUMKEYS countKeyInRange(char *leftKey, char *rightKey);
 
 int main(int argc, char **argv) {
