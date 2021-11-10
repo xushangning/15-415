@@ -18,8 +18,6 @@ extern FILE *fpbtree;
 extern int iCount; /* counts the number of inserted words */
 
 extern int SplitRoot(PAGENO RootPageNum, struct upKey *upKeyPtr);
-extern struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key,
-                                         TEXTPTR TextOffset);
 
 /**
  * @param Key
