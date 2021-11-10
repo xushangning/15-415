@@ -29,10 +29,6 @@ struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key,
                                          char *Key, NUMKEYS NumKeys);
     struct upKey *NewKey, *MiddleKey;
 
-    struct upKey *InsertKeyInLeaf(struct PageHdr * PagePtr, char *Key,
-                                  TEXTPTR TextOffset),
-        *InsertKeyInNonLeaf(struct PageHdr * PagePtr, struct upKey * MiddleKey);
-
     struct KeyRecord *KeyListTraverser; /* Pointer to list of keys */
     struct PageHdr *PagePtr;
 

@@ -148,3 +148,7 @@ void FlushPage(struct PageHdr *PagePtr);
 
 int FindInsertionPosition(struct KeyRecord * KeyListTraverser, char *Key,
                           bool *Found, NUMKEYS NumKeys, int Count);
+struct upKey *InsertKeyInLeaf(struct PageHdr * PagePtr, char *Key,
+                              TEXTPTR TextOffset);
+struct upKey *InsertKeyInNonLeaf(struct PageHdr * PagePtr, struct upKey * MiddleKey);
+
