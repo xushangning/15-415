@@ -22,9 +22,8 @@ struct upKey *InsertKeyInNonLeaf(struct PageHdr *PagePtr,
         *KeyListTrailer,                /* Pointers to the list of keys */
         *MiddleKeyCopy;                 /* KeyRecord structure, to contain */
     /* the MiddleKey */
-    int Count, Found, InsertionPosition, i;
-    int FindInsertionPosition(struct KeyRecord * KeyListTraverser, char *Key,
-                              int *Found, NUMKEYS NumKeys, int Count);
+    int Count, InsertionPosition, i;
+    bool Found;
     char *Word; /* Key stored in B-Tree */
     struct upKey *newUpKey;
     char *strsave(char *s);

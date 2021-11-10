@@ -145,3 +145,6 @@ struct PageHdr *FetchPage(PAGENO Page);
 struct upKey *SplitPage(struct PageHdr * PagePtr);
 void FreePage(struct PageHdr *PagePtr);
 void FlushPage(struct PageHdr *PagePtr);
+
+int FindInsertionPosition(struct KeyRecord * KeyListTraverser, char *Key,
+                          bool *Found, NUMKEYS NumKeys, int Count);

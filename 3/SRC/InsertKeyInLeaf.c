@@ -24,11 +24,10 @@ struct upKey *InsertKeyInLeaf(struct PageHdr *PagePtr, char *Key,
         *NewKeyNode;
 
     int InsertionPosition, /* Position for insertion */
-        Count, Found, i;
+        Count, i;
+    bool Found;
     POSTINGSPTR PostOffset;
     struct upKey *MiddleKey;
-    int FindInsertionPosition(struct KeyRecord * KeyListTraverser, char *Key,
-                              int *Found, NUMKEYS NumKeys, int Count);
     char *strsave(char *s);
 
     Count = 0;
@@ -39,7 +38,7 @@ struct upKey *InsertKeyInLeaf(struct PageHdr *PagePtr, char *Key,
                                               PagePtr->NumKeys, Count);
 
     /* Key is already in the B-Tree */
-    if (Found == TRUE) {
+    if (Found) {
 
         POSTINGSPTR oldpointer;
         /* printf ("Key = %s\n", Key);

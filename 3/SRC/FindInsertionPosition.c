@@ -30,7 +30,7 @@
  * keys before the insertion position
  */
 int FindInsertionPosition(struct KeyRecord *KeyListTraverser, char *Key,
-                          int *Found, NUMKEYS NumKeys, int Count) {
+                          bool *Found, NUMKEYS NumKeys, int Count) {
     int Result;
     int CompareKeys(char *Key, char *Word);
 
@@ -39,7 +39,7 @@ int FindInsertionPosition(struct KeyRecord *KeyListTraverser, char *Key,
     for the first time! */
 
     if (NumKeys == 0) {
-        *Found = FALSE;
+        *Found = false;
         return (Count);
     }
 
@@ -51,10 +51,10 @@ int FindInsertionPosition(struct KeyRecord *KeyListTraverser, char *Key,
 
     if (Result == 0) /* Match found */
     {
-        *Found = TRUE;
+        *Found = true;
         return (Count); /* Location of matched key */
     } else              /* No match yet */
-        *Found = FALSE;
+        *Found = false;
 
     if (NumKeys > 0) {
         if (Result == 1)        /* New key < stored key */
