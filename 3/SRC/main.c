@@ -29,7 +29,6 @@ extern void scanTree(void (*f)(struct KeyRecord *));
 extern int insert(char *fname);
 extern int search(char *key, int flag);
 extern int printPage(PAGENO i, FILE *fpb);
-extern void PrintTreeInOrder(PAGENO pgNum, int level);
 extern int dbclose(void);
 extern void printKey(struct KeyRecord *p);
 extern void printOcc(struct KeyRecord *p);
