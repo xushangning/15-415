@@ -149,9 +149,9 @@ void FlushPage(struct PageHdr *PagePtr);
 int FindInsertionPosition(struct KeyRecord * KeyListTraverser, char *Key,
                           bool *Found, NUMKEYS NumKeys, int Count);
 struct upKey *InsertKeyInLeaf(struct PageHdr * PagePtr, char *Key,
-                              TEXTPTR TextOffset);
+                              TEXTPTR TextOffset, bool *duplicate_key);
 struct upKey *InsertKeyInNonLeaf(struct PageHdr * PagePtr, struct upKey * MiddleKey);
-struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key, TEXTPTR TextOffset);
+struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key, TEXTPTR TextOffset, bool *duplicate_key);
 
 void PrintTreeInOrder(PAGENO pgNum, int level);
 NUMKEYS subtreeKeyCount(PAGENO root);

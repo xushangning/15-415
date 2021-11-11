@@ -1,6 +1,10 @@
 #include "def.h"
 
 NUMKEYS subtreeKeyCount(PAGENO root) {
+    struct PageHdr *page = FetchPage(root);
+    NUMKEYS ret = page->SubtreeKeyCount;
+    FreePage(page);
+#ifndef NDEBUG
     struct PageHdr *left, *right;
     // Follow the leftmost pointer to the leftmost leaf page in the tree.
     PAGENO pgNum = root;
@@ -31,6 +35,7 @@ NUMKEYS subtreeKeyCount(PAGENO root) {
     }
     FreePage(left);
     FreePage(right);
-
-    return count;
+    assert(ret == count);
+#endif
+    return ret;
 }

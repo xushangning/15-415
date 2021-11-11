@@ -29,7 +29,7 @@ struct upKey *InsertKeyInNonLeaf(struct PageHdr *PagePtr,
     char *strsave(char *s);
 
     if (MiddleKey == NULL) { /* just free the page-image */
-        FreePage(PagePtr);
+        FlushPage(PagePtr);
         return (NULL);
     }
 

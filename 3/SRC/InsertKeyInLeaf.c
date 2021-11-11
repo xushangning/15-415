@@ -18,14 +18,13 @@ extern int CreatePosting(TEXTPTR TextOffset, POSTINGSPTR *pPostOffset);
 extern int fillIn(struct PageHdr *PagePtr);
 
 struct upKey *InsertKeyInLeaf(struct PageHdr *PagePtr, char *Key,
-                              TEXTPTR TextOffset) {
+                              TEXTPTR TextOffset, bool *duplicate_key) {
     struct KeyRecord *KeyListTraverser, /*                              */
         *KeyListTrailer,                /* Pointers to the list of keys */
         *NewKeyNode;
 
     int InsertionPosition, /* Position for insertion */
         Count, i;
-    bool Found;
     POSTINGSPTR PostOffset;
     struct upKey *MiddleKey;
     char *strsave(char *s);
@@ -34,11 +33,11 @@ struct upKey *InsertKeyInLeaf(struct PageHdr *PagePtr, char *Key,
 
     /* Find insertion position */
     KeyListTraverser = PagePtr->KeyListPtr;
-    InsertionPosition = FindInsertionPosition(KeyListTraverser, Key, &Found,
+    InsertionPosition = FindInsertionPosition(KeyListTraverser, Key, duplicate_key,
                                               PagePtr->NumKeys, Count);
 
     /* Key is already in the B-Tree */
-    if (Found) {
+    if (*duplicate_key) {
 
         POSTINGSPTR oldpointer;
         /* printf ("Key = %s\n", Key);
@@ -87,6 +86,8 @@ struct upKey *InsertKeyInLeaf(struct PageHdr *PagePtr, char *Key,
 
     /* Update page header information */
     fillIn(PagePtr);
+
+    ++PagePtr->SubtreeKeyCount;
 
     /* split page, if necessary, and flush */
     if (PagePtr->NumBytes <= PAGESIZE) {

@@ -38,6 +38,10 @@ void SplitRoot(PAGENO RootPageNum, struct upKey *upKeyPtr) {
     NewPagePtr->PtrToFinalRtgPg = upKeyPtr->right;
     /* points to the second half of old root */
 
+    struct PageHdr *right_child = FetchPage(upKeyPtr->right);
+    NewPagePtr->SubtreeKeyCount = PagePtr->SubtreeKeyCount + right_child->SubtreeKeyCount;
+    FreePage(right_child);
+
     /* Record the page pointers */
     PagePtr->PgNum = getNewPageNum();
     /* the left part of the old root will be flushed */

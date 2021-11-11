@@ -21,6 +21,7 @@ void CreateRoot(void) {
     PagePtr->PgTypeID = LeafSymbol;
     PagePtr->PgNum = ROOT;
     PagePtr->PgNumOfNxtLfPg = NULLPAGENO;
+    PagePtr->SubtreeKeyCount = 0;
     PagePtr->KeyListPtr = NULL; /* no keys yet */
 
     FlushPage(PagePtr); /* fills in #bytes & #keys */

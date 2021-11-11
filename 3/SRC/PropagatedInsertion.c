@@ -23,7 +23,7 @@
 
 #include "def.h"
 struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key,
-                                  TEXTPTR TextOffset) {
+                                  TEXTPTR TextOffset, bool *duplicate_key) {
     PAGENO ChildPage, FindPageNumOfChild(struct PageHdr * PagePtr,
                                          struct KeyRecord * KeyListTraverser,
                                          char *Key, NUMKEYS NumKeys);
@@ -35,18 +35,21 @@ struct upKey *PropagatedInsertion(PAGENO PageNo, char *Key,
     PagePtr = FetchPage(PageNo);
 
     if (IsLeaf(PagePtr)) {
-        MiddleKey = InsertKeyInLeaf(PagePtr, Key, TextOffset);
+        MiddleKey = InsertKeyInLeaf(PagePtr, Key, TextOffset, duplicate_key);
     } else if (IsNonLeaf(PagePtr)) {
         KeyListTraverser = PagePtr->KeyListPtr;
         ChildPage = FindPageNumOfChild(PagePtr, KeyListTraverser, Key,
                                        PagePtr->NumKeys);
-        NewKey = PropagatedInsertion(ChildPage, Key, TextOffset);
+        NewKey = PropagatedInsertion(ChildPage, Key, TextOffset, duplicate_key);
+        if (!*duplicate_key)
+            ++PagePtr->SubtreeKeyCount;
         MiddleKey = InsertKeyInNonLeaf(PagePtr, NewKey);
     } else { /* impossible */
         printf("Prop-Insertion: Illegal PageType:%c", PagePtr->PgTypeID);
         printf("in page# %d - aborting\n", (int) PagePtr->PgNum);
         exit(-2);
     }
+//    printf("%s: %ld (%d)\n", Key, PageNo, subtreeKeyCount(PageNo));
 
     return (MiddleKey);
 }

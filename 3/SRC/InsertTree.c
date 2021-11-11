@@ -39,7 +39,8 @@ void InsertTree(char *Key, TEXTPTR TextOffset) {
     }
 
     /* insert key */
-    MiddleKey = PropagatedInsertion(ROOT, Key, TextOffset);
+    bool duplicate_key;
+    MiddleKey = PropagatedInsertion(ROOT, Key, TextOffset, &duplicate_key);
 
     /* The Root Must be Split */
     if (MiddleKey != NULL)

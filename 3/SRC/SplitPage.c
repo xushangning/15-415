@@ -45,6 +45,22 @@ struct upKey *SplitPage(struct PageHdr *PagePtr) {
     pmiddle = pbefore->Next;
     pafter = pmiddle->Next;
 
+    NUMKEYS first_half_subtree_key_count = 0;
+    if (IsLeaf(PagePtr))
+        first_half_subtree_key_count = FirstHalfNumKeys;
+    else {
+        struct KeyRecord *p = PagePtr->KeyListPtr;
+        while (true) {
+            struct PageHdr *page = FetchPage(p->PgNum);
+            first_half_subtree_key_count += page->SubtreeKeyCount;
+            FreePage(page);
+
+            if (p == pmiddle)
+                break;
+            p = p->Next;
+        };
+    }
+
     /* Install the header of new page */
     newPagePtr = (struct PageHdr *) malloc(sizeof(struct PageHdr));
     ck_malloc(newPagePtr, "newPagePtr");
@@ -54,6 +70,9 @@ struct upKey *SplitPage(struct PageHdr *PagePtr) {
         newPagePtr->PgNumOfNxtLfPg = PagePtr->PgNumOfNxtLfPg;
     if (IsNonLeaf(newPagePtr))
         newPagePtr->PtrToFinalRtgPg = PagePtr->PtrToFinalRtgPg;
+
+    newPagePtr->SubtreeKeyCount = PagePtr->SubtreeKeyCount - first_half_subtree_key_count;
+    PagePtr->SubtreeKeyCount = first_half_subtree_key_count;
 
     /* Transfer the keys of second half of page to new page */
     newPagePtr->KeyListPtr = pafter;
