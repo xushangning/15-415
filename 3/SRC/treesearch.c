@@ -19,7 +19,7 @@ extern PAGENO FindPageNumOfChild(struct PageHdr *PagePtr,
  * and return the page number (guaranteed to be a leaf page).
  */
 PAGENO treesearch_page(PAGENO PageNo, char *key) {
-    PAGENO result;
+    PAGENO result = 1;
     struct PageHdr *PagePtr = FetchPage(PageNo);
     if (IsLeaf(PagePtr)) { /* found leaf */
         result = PageNo;
