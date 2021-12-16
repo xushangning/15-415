@@ -45,70 +45,70 @@ typedef long  NUMPTRS;     /* needed to make contiguous postings easier */
 #define gotoeof(x)	fseek((x), (long) 0, 2);
 
 /**
- * The following structure is utilized for holding a page of the B-Tree.  It is
- * used for both Leaf and NonLeaf pages.  The pages are differentiated by the
- * first byte which contains 'L' if it is a Leaf page or 'N' if it is a NonLeaf
- * page.  All Leaf pages contain the field 'PgNumOfNxtLfPg' which is a pointer
- * (page number) to the next logical leaf page.  All NonLeaf pages contain the
- * field 'PtrToFinalRtgPg' which is a pointer (page number) to the rightmost
- * child.
+ * @brief A page of the B-Tree.
+ *
+ * It is used for both Leaf and NonLeaf pages.  The pages are differentiated
+ * by the first byte which contains 'L' if it is a Leaf page or 'N' if it is a
+ * NonLeaf page.  All Leaf pages contain the field 'PgNumOfNxtLfPg' which is a
+ * pointer (page number) to the next logical leaf page.  All NonLeaf pages
+ * contain the field 'PtrToFinalRtgPg' which is a pointer (page number) to the
+ * rightmost child.
  */
 struct PageHdr {
     /**
-     * 'N' for NonLeaf, 'L' for Leaf
+     * @brief 'N' for NonLeaf, 'L' for Leaf
      */
     char              PgTypeID;
 
     /**
-     * Page number within the B-Tree
+     * @brief Page number within the B-Tree
      */
     PAGENO           PgNum;
 
     /**
-     * Page number of next logical leaf page (LEAF PAGES ONLY)
+     * @brief Page number of next logical leaf page (LEAF PAGES ONLY)
      */
     PAGENO           PgNumOfNxtLfPg;
 
     /**
-     * Number of bytes stored within page
+     * @brief Number of bytes stored within page
      */
     NUMBYTES          NumBytes;
 
     /**
-     * Number of keys stored within page
+     * @brief Number of keys stored within page
      */
     NUMKEYS           NumKeys;
 
     NUMKEYS            SubtreeKeyCount; /* THIS IS YOUR TASK :) */
 
     /**
-     * Pointer to the list of keys and their relative data
+     * @brief Pointer to the list of keys and their relative data
      */
     struct KeyRecord *KeyListPtr;
 
     /**
-     * Page number of rightmost child (NONLEAF PAGES ONLY)
+     * @brief Page number of rightmost child (NONLEAF PAGES ONLY)
      */
     PAGENO           PtrToFinalRtgPg;
 };
 
 
 /**
- * The following structure is used to hold the keys which are stored in the
- * B-Tree page.  It is used for both Leaf and NonLeaf keys. If the page is a
- * NonLeaf page, the key will be accompanied by the field 'PgNum' which is a
- * pointer (page number) to a left child page that contains keys which are
- * lexicographically less than the the key in this page.  If the page is a Leaf
- * page, the key will be accompanied by the field 'Posting' which is a pointer
- * (offset) into the POSTINGSFILE (which contains the offsets into the Text
- * file).
+ * @brief Hold the keys stored in a B-Tree page.
+ *
+ * It is used for both Leaf and NonLeaf keys. If the page is a NonLeaf page,
+ * the key will be accompanied by the field 'PgNum' which is a pointer (page
+ * number) to a left child page that contains keys which are lexicographically
+ * less than the the key in this page.  If the page is a Leaf page, the key
+ * will be accompanied by the field 'Posting' which is a pointer (offset) into
+ * the POSTINGSFILE (which contains the offsets into the Text file).
  */
 struct KeyRecord {
     /**
-     * Page number of child page containing keys lexicographically less than
-     * or equal to `StoredKey` (NONLEAF PAGES ONLY).
+     * @brief Page number of child page containing keys lexicographically less
+     * than or equal to `StoredKey` (NONLEAF PAGES ONLY).
      *
-     * @details
      * The claim in the
      * [slide](https://15415.courses.cs.cmu.edu/fall2016/hws/HW3/BtreeStruct.pdf)
      * that when `KeyRecord` is a not a leaf, `PgNum`'s corresponding page
@@ -119,29 +119,29 @@ struct KeyRecord {
      PAGENO           PgNum;
 
      /**
-      * The length (in bytes) of the stored key
+      * @brief The length (in bytes) of the stored key
       */
      KEYLEN            KeyLen;
 
      /**
-      * A pointer to the dynamically allocated storage for the key containing
-      * up to MAXWORDSIZE characters
+      * @brief A pointer to the dynamically allocated storage for the key
+      * containing up to `MAXWORDSIZE` characters
       */
      char             *StoredKey;
 
      /**
-      * Offset of Postings record (LEAF PAGES ONLY)
+      * @brief Offset of Postings record (LEAF PAGES ONLY)
       */
      POSTINGSPTR       Posting;
 
      /**
-      * Pointer to the next logical KeyRecord structure
+      * @brief Pointer to the next logical KeyRecord structure
       */
      struct KeyRecord *Next;
 };
 
 /**
- * Holds the key to be moved upwards upon splitting.
+ * @brief Holds the key to be moved upwards upon splitting.
  */
 struct upKey {
 	PAGENO		left;	/* left page, with keys <= */

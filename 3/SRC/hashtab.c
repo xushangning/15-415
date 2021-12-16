@@ -9,7 +9,8 @@
 #include "def.h"
 #define HASHSIZE 100
 
-struct nlist {/* basic table entry */
+/** @brief Basic table entry */
+struct nlist {
     char *key;
     struct nlist *next;
 };
