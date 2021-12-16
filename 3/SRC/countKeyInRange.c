@@ -93,6 +93,8 @@ NUMKEYS NaiveCountKeyInRange(const char *leftKey, const char *rightKey) {
 }
 
 NUMKEYS countKeyInRange(char *leftKey, char *rightKey) {
+  strtolow(leftKey);
+  strtolow(rightKey);
   if (strcmp(leftKey, rightKey) > 0)
     return 0;
 

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -Wall -Werror
+CFLAGS=-g -Wall -Werror -D NDEBUG
 
 SRC=main.c PrintTree.c CompareKeys.c\
 	CreatePosting.c FetchPage.c InsertKeyInLeaf.c InsertTree.c\
