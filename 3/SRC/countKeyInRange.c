@@ -8,16 +8,54 @@ extern PAGENO FindPageNumOfChild(struct PageHdr *PagePtr,
 extern int strtolow(char *s);
 
 /**
- * Find the KeyRecord whose PgNum contains key.
+ * Find the first KeyRecord whose StoredKey is not less than the given key.
+ *
+ * @details
+ * If we assume that the given key is in the subtree rooted at the page which
+ * contains head and the page is a leaf page, then the returned KeyRecord has
+ * StoredKey == key. If we make the same assumption and the page is not a leaf
+ * page, then the returned KeyRecord's PgNum corresponds to the page that
+ * contains the given key.
+ * @details
+ * The claim in the
+ * [slide](https://15415.courses.cs.cmu.edu/fall2016/hws/HW3/BtreeStruct.pdf)
+ * that PgNum's corresponding page contains keys less than StoredKey is wrong.
+ * It actually contains keys less than or equal to StoredKey. Check
+ * SplitPage(struct PageHdr *PagePtr) for yourself.
  *
  * @param head
  * @param key
+ * @param[out] count The number of keys before the given key.
  * @return NULL if the key is in the last page
  */
-struct KeyRecord *FindPage(struct KeyRecord *head, const char *key) {
-  // Find the first KeyRecord not less than key.
-  while (head && strcmp(head->StoredKey, key) < 0)
+struct KeyRecord *KeyRecordLowerBound(struct KeyRecord *head, const char *key, NUMKEYS *count) {
+  NUMKEYS temp_count = 0;
+  while (head && strcmp(head->StoredKey, key) < 0) {
+    ++temp_count;
     head = head->Next;
+  }
+  if (count)
+    *count = temp_count;
+  return head;
+}
+
+/**
+ * Find the first KeyRecord whose StoredKey is greater than the given key.
+ *
+ * @param head
+ * @param key
+ * @param count
+ * @return
+ * @sa KeyRecordLowerBound(struct KeyRecord *head, const char *key, NUMKEYS *count)
+ */
+struct KeyRecord *KeyRecordUpperBound(struct KeyRecord *head, const char *key, NUMKEYS *count) {
+  NUMKEYS temp_count = 0;
+  while (head && strcmp(head->StoredKey, key) <= 0) {
+    ++temp_count;
+    head = head->Next;
+  }
+  if (count)
+    *count = temp_count;
   return head;
 }
 
@@ -27,9 +65,7 @@ NUMKEYS NaiveCountKeyInRange(const char *leftKey, const char *rightKey) {
   struct PageHdr *page = FetchPage(left);
   struct KeyRecord *r;
   NUMKEYS count = 0, temp_count = 0;
-  // Count the number of keys less than leftKey in the node.
-  for (r = page->KeyListPtr; r && strcmp(r->StoredKey, leftKey) < 0; r = r->Next)
-    ++temp_count;
+  r = KeyRecordLowerBound(page->KeyListPtr, leftKey, &temp_count);
 
   PAGENO right = strcmp(leftKey, rightKey) ? treesearch_page(ROOT, rightKey) : left;
   // Sum the number of keys from leftKey's node to the node right before
@@ -48,9 +84,9 @@ NUMKEYS NaiveCountKeyInRange(const char *leftKey, const char *rightKey) {
     count -= temp_count;
     r = page->KeyListPtr;
   }
-  // Count the number of keys not greater than rightKey in its node.
-  for (; r && strcmp(r->StoredKey, rightKey) <= 0; r = r->Next)
-    ++count;
+
+  KeyRecordUpperBound(r, rightKey, &temp_count);
+  count += temp_count;
 
   FreePage(page);
   return count;
@@ -71,7 +107,7 @@ NUMKEYS countKeyInRange(char *leftKey, char *rightKey) {
   // When the loop exits and lca doesn't point to a leaf, r points to the
   // KeyRecord whose PgNum contains leftKey.
   while (IsNonLeaf(lca)) {
-    r = FindPage(lca->KeyListPtr, leftKey);
+    r = KeyRecordLowerBound(lca->KeyListPtr, leftKey, NULL);
 
     PAGENO page_no;
     if (r == NULL)
@@ -88,17 +124,13 @@ NUMKEYS countKeyInRange(char *leftKey, char *rightKey) {
   NUMKEYS ret = 0;
   if (IsLeaf(lca)) {
     // count the number of keys in the leaf between leftkey and rightkey.
-    for (r = lca->KeyListPtr; r && strcmp(r->StoredKey, leftKey) < 0; r = r->Next);
-    while (r && strcmp(r->StoredKey, rightKey) <= 0) {
-      r = r->Next;
-      ++ret;
-    }
+    r = KeyRecordLowerBound(lca->KeyListPtr, leftKey, NULL);
+    KeyRecordUpperBound(r, rightKey, &ret);
   } else {
     struct KeyRecord *left = r, *right;
     // Number of pages between left and right, both exclusive
     NUMKEYS nInnerPages = 0;
-    for (right = left->Next; right && strcmp(right->StoredKey, rightKey) < 0; right = right->Next)
-      ++nInnerPages;
+    right = KeyRecordLowerBound(left->Next, rightKey, &nInnerPages);
     // right == NULL when rightKey is in the last page.
 
     struct PageHdr *left_page = FetchPage(left->PgNum),
@@ -132,11 +164,11 @@ NUMKEYS countKeyInRange(char *leftKey, char *rightKey) {
 
     // count left range
     while (IsNonLeaf(left_page)) {
+      NUMKEYS temp_count = 0;
+      left = KeyRecordLowerBound(left_page->KeyListPtr, leftKey, &temp_count);
       // Not NumKeys + 1 because not counting the page whose corresponding
       // subtree may contain leftKey in advance.
-      nInnerPages = left_page->NumKeys;
-      for (left = left_page->KeyListPtr; left && strcmp(left->StoredKey, leftKey) < 0; left = left->Next)
-        --nInnerPages;
+      nInnerPages = left_page->NumKeys - temp_count;
 
       struct PageHdr *next_left_page = FetchPage(left ? left->PgNum : left_page->PtrToFinalRtgPg);
       if (nInnerPages <= left_page->NumKeys - nInnerPages) {
@@ -163,16 +195,15 @@ NUMKEYS countKeyInRange(char *leftKey, char *rightKey) {
       left_page = next_left_page;
     }
     // Now left_page is a leaf.
-    ret += left_page->SubtreeKeyCount;
-    for (r = left_page->KeyListPtr; r && strcmp(r->StoredKey, leftKey) < 0; r = r->Next)
-      --ret;
+    NUMKEYS temp_count = 0;
+    r = KeyRecordLowerBound(left_page->KeyListPtr, leftKey, &temp_count);
+    ret += left_page->SubtreeKeyCount - temp_count;
     FreePage(left_page);
 
     // count right range
     while (IsNonLeaf(right_page)) {
       nInnerPages = 0;
-      for (right = right_page->KeyListPtr; right && strcmp(right->StoredKey, rightKey) < 0; right = right->Next)
-        ++nInnerPages;
+      right = KeyRecordLowerBound(right_page->KeyListPtr, rightKey, &nInnerPages);
 
       struct PageHdr *next_right_page = FetchPage(right ? right->PgNum : right_page->PtrToFinalRtgPg);
       if (nInnerPages <= right_page->NumKeys - nInnerPages) {
@@ -199,8 +230,8 @@ NUMKEYS countKeyInRange(char *leftKey, char *rightKey) {
       right_page = next_right_page;
     }
     // Now right_page is a leaf.
-    for (r = right_page->KeyListPtr; r && strcmp(r->StoredKey, rightKey) <= 0; r = r->Next)
-      ++ret;
+    KeyRecordUpperBound(right_page->KeyListPtr, rightKey, &temp_count);
+    ret += temp_count;
     FreePage(right_page);
   }
   FreePage(lca);
