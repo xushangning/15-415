@@ -219,7 +219,7 @@ NUMKEYS countKeyInRange(char *leftKey, char *rightKey) {
         if (right) {
           for (r = right->Next; r; r = r->Next) {
             page = FetchPage(r->PgNum);
-            ret += page->SubtreeKeyCount;
+            ret -= page->SubtreeKeyCount;
             FreePage(page);
           }
           page = FetchPage(right_page->PtrToFinalRtgPg);
