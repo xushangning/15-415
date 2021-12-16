@@ -16,12 +16,6 @@ extern int strtolow(char *s);
  * StoredKey == key. If we make the same assumption and the page is not a leaf
  * page, then the returned KeyRecord's PgNum corresponds to the page that
  * contains the given key.
- * @details
- * The claim in the
- * [slide](https://15415.courses.cs.cmu.edu/fall2016/hws/HW3/BtreeStruct.pdf)
- * that PgNum's corresponding page contains keys less than StoredKey is wrong.
- * It actually contains keys less than or equal to StoredKey. Check
- * SplitPage(struct PageHdr *PagePtr) for yourself.
  *
  * @param head
  * @param key

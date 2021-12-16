@@ -106,7 +106,15 @@ struct PageHdr {
 struct KeyRecord {
     /**
      * Page number of child page containing keys lexicographically less than
-     * stored key (NONLEAF PAGES ONLY)
+     * or equal to `StoredKey` (NONLEAF PAGES ONLY).
+     *
+     * @details
+     * The claim in the
+     * [slide](https://15415.courses.cs.cmu.edu/fall2016/hws/HW3/BtreeStruct.pdf)
+     * that when `KeyRecord` is a not a leaf, `PgNum`'s corresponding page
+     * contains keys less than `StoredKey` is wrong. It actually contains keys
+     * less than or equal to `StoredKey`. Check
+     * SplitPage(struct PageHdr *PagePtr) for yourself.
      */
      PAGENO           PgNum;
 
