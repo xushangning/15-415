@@ -1,14 +1,10 @@
-\documentclass{article}
+\documentclass{homework}
 
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,er,positioning}
 
 \usepackage{minted}
 \usepackage{booktabs}
-
-\usepackage{enumitem}
-\setlist[enumerate, 1]{label=(\alph*)}
-\setlist[enumerate, 2]{label=\roman*.}
 
 \title{
     15-415/615 - Database Applications
@@ -21,7 +17,7 @@
 
 \maketitle
 
-\section*{Question 1: Entity-Relationship Diagram}
+\section{Entity-Relationship Diagram}
 
 \begin{tikzpicture}
     \node (photos) at (1, 1) [entity] {Photos} [sibling distance=20mm]
@@ -79,7 +75,7 @@
 
 \newpage
 
-\section*{Question 2: SQL Tables from the ER Model}
+\section{SQL Tables from the ER Model}
 
 \begin{minted}[linenos]{sql}
 CREATE TABLE Buildings (
@@ -122,7 +118,7 @@ CREATE TABLE TenantFriends (
 
 \newpage
 
-\section*{Question 3: Relational Algebra}
+\section{Relational Algebra}
 
 \begin{enumerate}
     \item 2
@@ -178,7 +174,7 @@ CREATE TABLE TenantFriends (
 \end{enumerate}
 \newpage
 
-\section*{Question 4: Relational Tuple Calculus (RTC)}
+\section{Relational Tuple Calculus (RTC)}
 
 \begin{enumerate}
     \item
@@ -213,7 +209,7 @@ CREATE TABLE TenantFriends (
 \end{enumerate}
 \newpage
 
-\section*{Question 5: Relational Domain Calculus (RDC)}
+\section{Relational Domain Calculus (RDC)}
 
 \begin{enumerate}
     \item
