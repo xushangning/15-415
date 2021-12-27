@@ -58,8 +58,8 @@
 
     \item \begin{enumerate}
         \item 1
-        \item 6
-        \item 31
+        \item 3
+        \item 13
     \end{enumerate}
 
     \item 17
@@ -74,6 +74,8 @@
     \item \includegraphics[width=\linewidth]{img/4-3-b.pdf}
     \item \includegraphics[width=\linewidth]{img/4-3-c.pdf}
     \item \includegraphics[width=\linewidth]{img/4-3-d.pdf}
+    % The solution merges the leaves around the key 25, which makes absolutely
+    % no sense as there is no underflow.
     \item \includegraphics[width=\linewidth]{img/4-3-e.pdf}
 \end{enumerate}
 
@@ -86,6 +88,8 @@
     \item F
     \item \begin{enumerate}
         \item 11
+        % The solution merges the first and the last buckets, but the slides
+        % never mention how to handle deletion.
         \item \begin{tikzpicture}[
                 bucket/.style={
                     matrix of nodes,
