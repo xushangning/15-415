@@ -9,3 +9,4 @@
 
 \RequirePackage{titlesec}
 \titlelabel{Question \thesection: }
+\newcommand{\sectionbreak}{\newpage}
