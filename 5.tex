@@ -1,0 +1,306 @@
+\documentclass{homework}
+
+\usepackage{minted}
+
+\title{
+    15-415/615 - Database Applications
+
+    Answers to Homework 5
+}
+\author{Shangning Xu}
+
+\begin{document}
+
+\maketitle
+
+\section{EXPLAIN and ANALYZE}
+
+\begin{enumerate}
+    \item \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{sql}
+=# EXPLAIN ANALYZE SELECT * FROM trip WHERE bike_id = 10;
+                                                      QUERY PLAN
+-----------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..14191.67 rows=793 width=80) (actual time=4.393..577.368 rows=248 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   ->  Parallel Seq Scan on trip  (cost=0.00..13112.37 rows=330 width=80) (actual time=1.860..563.568 rows=83 loops=3)
+         Filter: (bike_id = 10)
+         Rows Removed by Filter: 223237
+ Planning Time: 3.777 ms
+ Execution Time: 578.010 ms
+(8 rows)
+\end{minted}
+
+    \item \begin{enumerate}
+        \item 14191.67
+        \item 578.010 ms
+    \end{enumerate}
+
+    \item \mintinline{sql}{CREATE INDEX ON trip (bike_id);}
+    
+    \item \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{text}
+                                                          QUERY PLAN
+------------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on trip  (cost=10.57..2425.21 rows=793 width=80) (actual time=0.441..3.581 rows=248 loops=1)
+   Recheck Cond: (bike_id = 10)
+   Heap Blocks: exact=234
+   ->  Bitmap Index Scan on trip_bike_id_idx  (cost=0.00..10.37 rows=793 width=0) (actual time=0.312..0.313 rows=248 loops=1)
+         Index Cond: (bike_id = 10)
+ Planning Time: 0.622 ms
+ Execution Time: 4.884 ms
+(7 rows)
+\end{minted}
+
+    \item \begin{enumerate}
+        \item 2425.21
+        \item 4.884 ms
+        \item 793
+        \item 248
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item \begin{minted}[breaklines]{sql}
+=# SELECT relpages FROM pg_class WHERE relname = 'trip_bike_id_idx';
+ relpages
+----------
+      590
+(1 row)
+\end{minted}
+        \item \begin{minted}[breaklines]{sql}
+=# SELECT reltuples FROM pg_class WHERE relname = 'trip_bike_id_idx';
+ reltuples
+-----------
+    669959
+(1 row)
+\end{minted}
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item 3665
+        \item \mintinline{sql}{DELETE FROM weather WHERE date < '2013-10-01';}
+        \item No. Query (g).i's result is unchanged, while \texttt{SELECT COUNT(*)} shows that there are only 3500 rows left.
+        \item After running \texttt{ANALYZE}, the two results match.
+    \end{enumerate}
+\end{enumerate}
+
+\section{Using indexes}
+
+\begin{enumerate}
+    \item \mint{sql}{CREATE INDEX ON trip (start_station_name);}
+    
+    \item \begin{enumerate}
+        \item Yes
+        \item No
+        \item No
+        \item Yes
+        \item Yes
+        \item No
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item 2
+        \item 1
+        \item 3
+        \item 1
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item Yes
+        \item 0.54\%
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item No
+        \item 100\%
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item External merge
+        \item Disk
+        \item 21736 kB
+        \item 1180.639 ms
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item Quicksort
+        \item Memory
+        \item 115909 kB
+        \item 687.525 ms
+    \end{enumerate}
+\end{enumerate}
+
+\section{Joins}
+
+\begin{enumerate}
+    \item \begin{enumerate}
+        \item \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{text}
+                                                                QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------------
+ Hash Join  (cost=660.37..11169.57 rows=57983 width=92) (actual time=14.378..127.419 rows=58161 loops=1)
+   Hash Cond: (trip.start_station_id = station.station_id)
+   ->  Bitmap Heap Scan on trip  (cost=657.79..11005.58 rows=57983 width=80) (actual time=13.889..91.321 rows=58161 loops=1)
+         Recheck Cond: (bike_id < 200)
+         Heap Blocks: exact=9541
+         ->  Bitmap Index Scan on trip_bike_id_idx  (cost=0.00..643.30 rows=57983 width=0) (actual time=10.686..10.686 rows=58161 loops=1)
+               Index Cond: (bike_id < 200)
+   ->  Hash  (cost=1.70..1.70 rows=70 width=14) (actual time=0.116..0.117 rows=70 loops=1)
+         Buckets: 1024  Batches: 1  Memory Usage: 12kB
+         ->  Seq Scan on station  (cost=0.00..1.70 rows=70 width=14) (actual time=0.022..0.041 rows=70 loops=1)
+ Planning Time: 4.287 ms
+ Execution Time: 132.905 ms
+(12 rows)
+\end{minted}
+        \item Hash
+        \item 11169.57
+        \item 132.905 ms
+    \end{enumerate}
+
+    \item
+    \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{text}
+                                                                QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop  (cost=657.95..12454.44 rows=57983 width=92) (actual time=13.861..95.690 rows=58161 loops=1)
+   ->  Bitmap Heap Scan on trip  (cost=657.79..11005.58 rows=57983 width=80) (actual time=13.778..39.483 rows=58161 loops=1)
+         Recheck Cond: (bike_id < 200)
+         Heap Blocks: exact=9541
+         ->  Bitmap Index Scan on trip_bike_id_idx  (cost=0.00..643.30 rows=57983 width=0) (actual time=10.136..10.137 rows=58161 loops=1)
+               Index Cond: (bike_id < 200)
+   ->  Memoize  (cost=0.15..0.17 rows=1 width=14) (actual time=0.000..0.000 rows=1 loops=58161)
+         Cache Key: trip.start_station_id
+         Hits: 58091  Misses: 70  Evictions: 0  Overflows: 0  Memory Usage: 8kB
+         ->  Index Scan using station_pkey on station  (cost=0.14..0.16 rows=1 width=14) (actual time=0.003..0.003 rows=1 loops=70)
+               Index Cond: (station_id = trip.start_station_id)
+ Planning Time: 0.284 ms
+ Execution Time: 100.938 ms
+(13 rows)
+\end{minted}
+    
+    \begin{enumerate}
+        \item Nested loop
+        \item 12454.44
+        \item 100.938 ms
+    \end{enumerate}
+
+    \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{text}
+                                                                QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop  (cost=657.95..12454.44 rows=57983 width=92) (actual time=14.113..93.570 rows=58161 loops=1)
+   ->  Bitmap Heap Scan on trip  (cost=657.79..11005.58 rows=57983 width=80) (actual time=14.078..38.102 rows=58161 loops=1)
+         Recheck Cond: (bike_id < 200)
+         Heap Blocks: exact=9541
+         ->  Bitmap Index Scan on trip_bike_id_idx  (cost=0.00..643.30 rows=57983 width=0) (actual time=10.529..10.529 rows=58161 loops=1)
+               Index Cond: (bike_id < 200)
+   ->  Memoize  (cost=0.15..0.17 rows=1 width=14) (actual time=0.000..0.000 rows=1 loops=58161)
+         Cache Key: trip.start_station_id
+         Hits: 58091  Misses: 70  Evictions: 0  Overflows: 0  Memory Usage: 8kB
+         ->  Index Scan using station_pkey on station  (cost=0.14..0.16 rows=1 width=14) (actual time=0.003..0.003 rows=1 loops=70)
+               Index Cond: (station_id = trip.start_station_id)
+ Planning Time: 0.293 ms
+ Execution Time: 98.542 ms
+(13 rows)
+\end{minted}
+
+    \begin{enumerate}
+        \item Nested loop
+        \item 12454.44
+        \item 98.542 ms
+    \end{enumerate}
+
+    \item
+    \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{text}
+                                                    QUERY PLAN
+-------------------------------------------------------------------------------------------------------------------
+ Nested Loop  (cost=0.00..78036.60 rows=57983 width=92) (actual time=0.069..586.053 rows=58161 loops=1)
+   Join Filter: (trip.start_station_id = station.station_id)
+   Rows Removed by Join Filter: 1637515
+   ->  Seq Scan on trip  (cost=0.00..17997.49 rows=57983 width=80) (actual time=0.020..174.632 rows=58161 loops=1)
+         Filter: (bike_id < 200)
+         Rows Removed by Filter: 611798
+   ->  Materialize  (cost=0.00..2.05 rows=70 width=14) (actual time=0.000..0.002 rows=29 loops=58161)
+         ->  Seq Scan on station  (cost=0.00..1.70 rows=70 width=14) (actual time=0.013..0.046 rows=70 loops=1)
+ Planning Time: 0.297 ms
+ Execution Time: 589.993 ms
+(10 rows)
+\end{minted}
+
+    \begin{enumerate}
+        \item Nested loop
+        \item 589.993 ms
+    \end{enumerate}
+\end{enumerate}
+
+\section{More complicated join with order by}
+
+\begin{enumerate}[start=2]
+    \item \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{text}
+                                                               QUERY PLAN
+----------------------------------------------------------------------------------------------------------------------------------------
+ Incremental Sort  (cost=96819.06..56791461.68 rows=2886 width=18) (actual time=53704.898..672116.386 rows=3583 loops=1)
+   Sort Key: o.bike_id, ((SubPlan 1))
+   Presorted Key: o.bike_id
+   Full-sort Groups: 11  Sort Method: quicksort  Average Memory: 30kB  Peak Memory: 30kB
+   Pre-sorted Groups: 11  Sort Method: quicksort  Average Memory: 72kB  Peak Memory: 123kB
+   ->  Gather Merge  (cost=14173.88..56791350.77 rows=2886 width=18) (actual time=345.374..672103.773 rows=3583 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         ->  Sort  (cost=13173.86..13176.86 rows=1202 width=10) (actual time=117.913..118.608 rows=1194 loops=3)
+               Sort Key: o.bike_id
+               Sort Method: quicksort  Memory: 114kB
+               Worker 0:  Sort Method: quicksort  Memory: 101kB
+               Worker 1:  Sort Method: quicksort  Memory: 99kB
+               ->  Parallel Seq Scan on trip o  (cost=0.00..13112.37 rows=1202 width=10) (actual time=0.074..116.635 rows=1194 loops=3)
+                     Filter: (bike_id < 20)
+                     Rows Removed by Filter: 222125
+         SubPlan 1
+           ->  Aggregate  (cost=19673.19..19673.19 rows=1 width=8) (actual time=187.535..187.535 rows=1 loops=3583)
+                 ->  Seq Scan on trip i  (cost=0.00..19672.39 rows=320 width=4) (actual time=0.463..187.454 rows=299 loops=3583)
+                       Filter: ((end_time <= o.end_time) AND (bike_id = o.bike_id))
+                       Rows Removed by Filter: 669660
+ Planning Time: 0.233 ms
+ Execution Time: 672116.695 ms
+(23 rows)
+\end{minted}
+
+    \item \begin{enumerate}
+        \item 56791461.68
+        \item 672116.695 ms
+    \end{enumerate}
+
+    \item \begin{enumerate}
+        \item Quicksort
+        \item Memory
+    \end{enumerate}
+
+    \item An index on \texttt{bike\_id} will be more helpful.
+    
+    \mint{sql}{CREATE INDEX ON trip (bike_id);}
+
+    \item \begin{enumerate}
+        \item \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{text}
+                                                                     QUERY PLAN
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+ Incremental Sort  (cost=11947.67..8207810.62 rows=2886 width=18) (actual time=92.835..2983.044 rows=3583 loops=1)
+   Sort Key: o.bike_id, ((SubPlan 1))
+   Presorted Key: o.bike_id
+   Full-sort Groups: 11  Sort Method: quicksort  Average Memory: 30kB  Peak Memory: 30kB
+   Pre-sorted Groups: 11  Sort Method: quicksort  Average Memory: 72kB  Peak Memory: 123kB
+   ->  Index Scan using trip_bike_id_idx on trip o  (cost=0.42..8207699.72 rows=2886 width=18) (actual time=0.503..2979.457 rows=3583 loops=1)
+         Index Cond: (bike_id < 20)
+         SubPlan 1
+           ->  Aggregate  (cost=2840.46..2840.47 rows=1 width=8) (actual time=0.828..0.828 rows=1 loops=3583)
+                 ->  Bitmap Heap Scan on trip i  (cost=11.71..2839.66 rows=320 width=4) (actual time=0.267..0.786 rows=299 loops=3583)
+                       Recheck Cond: (bike_id = o.bike_id)
+                       Filter: (end_time <= o.end_time)
+                       Rows Removed by Filter: 298
+                       Heap Blocks: exact=1929784
+                       ->  Bitmap Index Scan on trip_bike_id_idx  (cost=0.00..11.62 rows=960 width=0) (actual time=0.135..0.135 rows=597 loops=3583)
+                             Index Cond: (bike_id = o.bike_id)
+ Planning Time: 0.626 ms
+ Execution Time: 2983.313 ms
+(18 rows)
+\end{minted}
+        \item Yes, the index helped reduce the estimated cost, mostly in the aggregation part, where rows were fetched by an index scan instead of a sequential scan.
+    \end{enumerate}
+\end{enumerate}
+
+\end{document}
