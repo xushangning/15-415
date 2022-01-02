@@ -92,7 +92,7 @@
         \item Yes
         \item No
         \item No
-        \item Yes
+        \item Yes   % The query does use the index on my computer, but the solution doesn't.
         \item Yes
         \item No
     \end{enumerate}
@@ -101,7 +101,7 @@
         \item 2
         \item 1
         \item 3
-        \item 1
+        \item 1     % Again, the query plan is different between my computer and the solution.
     \end{enumerate}
 
     \item \begin{enumerate}
@@ -156,6 +156,7 @@
     \end{enumerate}
 
     \item
+    % The solution uses merge join.
     \begin{minted}[breaklines, breakafter=-, breakaftergroup=false]{text}
                                                                 QUERY PLAN
 -------------------------------------------------------------------------------------------------------------------------------------------
@@ -256,7 +257,7 @@
                  ->  Seq Scan on trip i  (cost=0.00..19672.39 rows=320 width=4) (actual time=0.463..187.454 rows=299 loops=3583)
                        Filter: ((end_time <= o.end_time) AND (bike_id = o.bike_id))
                        Rows Removed by Filter: 669660
- Planning Time: 0.233 ms
+ Planning Time: 0.233 ms 
  Execution Time: 672116.695 ms
 (23 rows)
 \end{minted}
@@ -300,6 +301,24 @@
 (18 rows)
 \end{minted}
         \item Yes, the index helped reduce the estimated cost, mostly in the aggregation part, where rows were fetched by an index scan instead of a sequential scan.
+        
+        % The solution states that filtering on o.bike_id < 20 is most improved
+        % by the new index. This is wrong. The following discussion concerns
+        % query plans in the solution.
+        %
+        % Filtering on o.bike_id < 20 is represented by the plan node "Seq Scan
+        % on trip o" in the old plan with execution time 301122.164, and
+        % "Bitmap Heap Scan on trip o" in the new plan with much lower execution
+        % time of 1367.394. However, a plan node's cost includes the cost of its
+        % children nodes! Aggregation is represented by "Aggregate" nodes in
+        % both plans, which are executed for 3583 times. The total time spent in
+        % aggregation for the old plan is
+        %   84.016 * 3583 = 301,029.328
+        % and
+        %   0.38 * 3583 = 1,361.54
+        % for the new plan. It is evident that most time is spent in aggregation
+        % (Actually, little time is spent in filtering in comparison!) and the
+        % part improved most by the index is the aggregation.
     \end{enumerate}
 \end{enumerate}
 
