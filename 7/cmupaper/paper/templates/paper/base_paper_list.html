@@ -1,0 +1,213 @@
+
+{% extends "paper/base_nav.html" %}
+{% block content %}
+<div class="page-header">
+	<h1>{{ header_text }}</h1>
+</div>
+<div class="row">
+    <div class="col-lg-4">
+        <div class="list-group">
+            {% if home %}
+            <a href={% url 'paper:home' %} class="list-group-item active">Home</a>
+            <a href={% url 'paper:popular_papers' %} class="list-group-item">Popular papers</a>
+            <a href={% url 'paper:new_paper' %} class="list-group-item">Post a new paper</a>
+            {% elif popular %}
+            <a href={% url 'paper:home' %} class="list-group-item">Home</a>
+            <a href={% url 'paper:popular_papers' %} class="list-group-item active">Popular papers</a>
+            <a href={% url 'paper:new_paper' %} class="list-group-item">Post a new paper</a>
+            {% elif new_paper %}
+            <a href={% url 'paper:home' %} class="list-group-item">Home</a>
+            <a href={% url 'paper:popular_papers' %} class="list-group-item">Popular papers</a>
+            <a href={% url 'paper:new_paper' %} class="list-group-item active">Post a new paper</a>
+            {% else %}
+            <a href={% url 'paper:home' %} class="list-group-item">Home</a>
+            <a href={% url 'paper:popular_papers' %} class="list-group-item">Popular papers</a>
+            <a href={% url 'paper:new_paper' %} class="list-group-item">Post a new paper</a>
+            {% endif %}
+            <!-- <a href="#" class="list-group-item">Function 4</a> -->
+        </div>
+        {% if home %}
+            <div class="page-header">
+            <h4>My statistics</h4>
+            </div>
+            <div class = "list-group">
+            <li class="list-group-item"># posts: {{ num_post }}</li>
+            <li class="list-group-item"># likes: {{ num_like }}</li>
+            <li class="list-group-item"># tags created: {{ num_tag }}</li>
+            </div>
+        {% elif popular %}
+            <div class="page-header">
+            <h4>Global statistics</h4>
+            </div>
+            <div class = "list-group">
+            <li class="list-group-item">Most active user:<br> {{ active_user }}</li>
+            <li class="list-group-item">Most popular tag:<br> {{ popular_tag }}</li>
+            <li class="list-group-item">Most popular tag pair:<br> {{ popular_pair }}</li>
+            </div>
+        {% endif %}
+        <div class="well">
+            <h4>Blog Search</h4>
+            <form role="form" action="{% url 'paper:search_view' %}" method='POST'>
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" class="form-control" name="keywords" placeholder="Keywords">
+                    <span class="input-group-btn">
+                        <button class="btn btn-default" type="button submit">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                    </span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% if new_paper %}
+    <div class="col-lg-8">
+        {% if error_message %}
+		<p><strong>{{ error_message }}</strong></p>
+		{% endif %}
+        <div class="well">
+            <form role="form" action="{% url 'paper:new_paper' %}" method='POST' enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <h4>Title:</h4>
+                    <textarea class="form-control" rows="1" name="title" placeholder="Less than 50 chars"></textarea>
+                    <h4>Tags:</h4>
+                    <textarea class="form-control" rows="1" name="tags" placeholder="tag1, tag2, tag3"></textarea>
+                    <h4>Description:</h4>
+                    <textarea class="form-control" rows="5" name="desc" placeholder="Less than 500 chars"></textarea>
+                </div>
+                <input type="file" name="post_pdf">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+{% else %}
+	<div class="col-lg-8">
+        {% if home %}
+        <div class="page_header">
+	        <h2>My papers</h2>
+        </div>
+        {% elif popular %}
+        <div class="page_header">
+	        <h2>Popular posts</h2>
+        </div>
+        {% endif %}
+        {% if error_message %}
+		<p><strong>{{ error_message }}</strong></p>
+		{% endif %}
+        {% for paper in paper_list %}
+            <div class="thumbnail">
+                <div class="caption-full">
+                    <h4>
+                        <a href={% url 'paper:view_paper' paper.pid %}>{{ paper.title }}</a>
+                        <small> {{ paper.begin_time }}</small>
+
+                    </h4>
+                    <small>
+                        {% for tag in paper.tags %}
+                            <a href={% url 'paper:tag_view' tag %}>#{{ tag }}&nbsp</a>
+                        {% endfor %}
+                    </small>
+                    <p>{{ paper.desc }}</p>
+                </div>
+                <div>
+                    {% if home %}
+                    <a href="{% url 'paper:delete_paper' paper.pid %}" class="btn btn-sm btn-default">Delete</a>
+                    {% else %}
+                    <a href="{% url 'paper:like' paper.pid source %}" class="btn btn-sm btn-primary">&nbspLike&nbsp</a>
+                    <a href="{% url 'paper:unlike' paper.pid source %}" class="btn btn-sm btn-primary">Unlike</a>
+                    {% endif %}
+                    <p class="pull-right text-primary">{{ paper.like }} like{{ paper.like|pluralize }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% if home %}
+        <div class="page_header">
+	        <h2>My liked papers</h2>
+        </div>
+        {% if error_message2 %}
+		<p><strong>{{ error_message2 }}</strong></p>
+		{% endif %}
+        {% for paper in liked_list %}
+            <div class="thumbnail">
+                <div class="caption-full">
+                    <h4>
+                        <a href={% url 'paper:view_paper' paper.pid %}>{{ paper.title }}</a>
+                        <small> {{ paper.begin_time }}</small>
+
+                    </h4>
+                    <small>
+                        {% for tag in paper.tags %}
+                            <a href={% url 'paper:tag_view' tag %}>#{{ tag }}&nbsp</a>
+                        {% endfor %}
+                    </small>
+                    <p>{{ paper.desc }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'paper:unlike' paper.pid source %}" class="btn btn-sm btn-primary">Unlike</a>
+                    <p class="pull-right text-primary">{{ paper.like }} like{{ paper.like|pluralize }}</p>
+                </div>
+            </div>
+        {% endfor %}
+        <div class="page_header">
+	        <h2>Recommendations</h2>
+        </div>
+        {% if error_message3 %}
+		<p><strong>{{ error_message3 }}</strong></p>
+		{% endif %}
+        {% for paper in recommend_list %}
+            <div class="thumbnail">
+                <div class="caption-full">
+                    <h4>
+                        <a href={% url 'paper:view_paper' paper.pid %}>{{ paper.title }}</a>
+                        <small> {{ paper.begin_time }}</small>
+
+                    </h4>
+                    <small>
+                        {% for tag in paper.tags %}
+                            <a href={% url 'paper:tag_view' tag %}>#{{ tag }}&nbsp</a>
+                        {% endfor %}
+                    </small>
+                    <p>{{ paper.desc }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'paper:like' paper.pid source %}" class="btn btn-sm btn-primary">&nbspLike&nbsp</a>
+                    <p class="pull-right text-primary">{{ paper.like }} like{{ paper.like|pluralize }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% elif popular %}
+        <div class="page_header">
+	        <h2>Recent papers</h2>
+        </div>
+        {% if error_message2 %}
+		<p><strong>{{ error_message2 }}</strong></p>
+		{% endif %}
+        {% for paper in recent_list %}
+            <div class="thumbnail">
+                <div class="caption-full">
+                    <h4>
+                        <a href={% url 'paper:view_paper' paper.pid %}>{{ paper.title }}</a>
+                        <small> {{ paper.begin_time }}</small>
+
+                    </h4>
+                    <small>
+                        {% for tag in paper.tags %}
+                            <a href={% url 'paper:tag_view' tag %}>#{{ tag }}&nbsp</a>
+                        {% endfor %}
+                    </small>
+                    <p>{{ paper.desc }}</p>
+                </div>
+                <div>
+                    <a href="{% url 'paper:like' paper.pid source %}" class="btn btn-sm btn-primary">&nbspLike&nbsp</a>
+                    <a href="{% url 'paper:unlike' paper.pid source %}" class="btn btn-sm btn-primary">Unlike</a>
+                    <p class="pull-right text-primary">{{ paper.like }} like{{ paper.like|pluralize }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+    </div>
+{% endif %}
+</div>
+{% endblock %}

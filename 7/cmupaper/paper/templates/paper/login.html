@@ -1,0 +1,20 @@
+{% extends "paper/base.html" %}
+
+{% block body %}
+<body>
+  <div class="container">
+    <div class="jumbotron">
+    <form class="form-signin" role="form" action="{% url 'paper:login' %}" method='POST'>
+      {% csrf_token %}
+      <h2 class="form-signin-heading">Login</h2>
+      {% if error_message %}
+      <h3 class="form-signin-heading">{{ error_message }}</h3>
+      {% endif %}
+      <input type="text" class="form-control" name='username' placeholder="Username" required autofocus>
+      <input type="password" class="form-control" name='password' placeholder="Password" required>
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+      <a href="{% url 'paper:signup' %}" class="btn btn-lg btn-primary btn-block">Or sign up</a>
+    </form>
+  </div>
+</body> 
+{% endblock %}
