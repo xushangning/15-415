@@ -1,6 +1,6 @@
 import psycopg2 as psy
 
-from constants import *
+from .constants import *
 
 
 def get_db_connection():
@@ -10,8 +10,8 @@ def get_db_connection():
     try:
         conn = psy.connect(DB_DESC)
         return SUCCESS, conn
-    except psy.DatabaseError, e:
-        print "Error %s" % e
+    except psy.DatabaseError as e:
+        print("Error %s" % e)
         return DB_CONNECTION_ERROR, None
 
 
@@ -21,8 +21,8 @@ def call_db_with_conn(conn, function_name, argdict):
     """
     try:
         return function_name(conn, **argdict)
-    except psy.DatabaseError, e:
-        print "Error %s: " % e.args[0]
+    except psy.DatabaseError as e:
+        print("Error %s: " % e.args[0])
         conn.rollback()
         return DB_ERROR, None
 
@@ -47,8 +47,8 @@ def call_db(function_name, argdict):
         if res != SUCCESS:
             return res, None
         return function_name(conn, **argdict)
-    except psy.DatabaseError, e:
-        print "Error %s: " % e.args[0]
+    except psy.DatabaseError as e:
+        print("Error %s: " % e.args[0])
         conn.rollback()
         return DB_ERROR, None
     finally:

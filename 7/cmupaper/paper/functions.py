@@ -7,7 +7,7 @@ import psycopg2 as psy
 
 from datetime import datetime
 from pytz import timezone
-from constants import *
+from .constants import *
 
 """
 General rules:
@@ -62,7 +62,7 @@ def example_select_current_time(conn):
         dt = res[0]
         # return the status and result
         return 0, dt
-    except psy.DatabaseError, e:
+    except psy.DatabaseError as e:
         # catch any database exception and return failure status
         return 1, None
 

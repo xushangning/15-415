@@ -12,9 +12,9 @@ from datetime import timedelta
 from datetime import datetime
 import textract
 
-from constants import *
-from database_wrapper import *
-import functions
+from .constants import *
+from .database_wrapper import *
+from . import functions
 import tempfile
 
 """
@@ -108,7 +108,7 @@ def get_paper_dict(paper_list):
         return \
             [{'pid':x[0], 'username':x[1], 'title':x[2], 'begin_time':x[3], 'desc':x[4]} for x in paper_list]
     except (IndexError, KeyError) as e:
-        print "[TA Hints] May be your return value is not in the correct format"
+        print("[TA Hints] May be your return value is not in the correct format")
         raise e
 
 """
@@ -133,7 +133,7 @@ def reset(request):
                 try:
                     os.remove(file)
                 except:
-                    print "Can not remove file %s" % file
+                    print("Can not remove file %s" % file)
     return render(request, 'paper/reset.html', context)
 
 

@@ -38,9 +38,9 @@ VERBOSE = False
 
 def report_result():
     # Report result
-    print "**********************************"
-    print "*          TEST RESULTS          *"
-    print "**********************************"
+    print("**********************************")
+    print("*          TEST RESULTS          *")
+    print("**********************************")
     pass_tests = []
     failed_tests = []
     not_tested = []
@@ -54,11 +54,11 @@ def report_result():
             not_tested.append(func_name)
     maxlen = len(max(ALL_FUNCS, key=len))
     for t in sorted(failed_tests, key=len):
-        print "[%s]: Failed" % t.ljust(maxlen)
+        print("[%s]: Failed" % t.ljust(maxlen))
     for t in sorted(not_tested, key=len):
-        print "[%s]: Not tested" % t.ljust(maxlen)
+        print("[%s]: Not tested" % t.ljust(maxlen))
     for t in sorted(pass_tests, key=len):
-        print "[%s]: Pass" % t.ljust(maxlen)
+        print("[%s]: Pass" % t.ljust(maxlen))
 
 
 def exit_test():
@@ -68,7 +68,7 @@ def exit_test():
 
 def error_message(func, msg, should_abort = True):
     RES[func.__name__] = False
-    print "[Error in %s]: %s" % (func.__name__, msg)
+    print("[Error in %s]: %s" % (func.__name__, msg))
     if should_abort:
         exit_test()
 
@@ -84,13 +84,13 @@ def status_error(func, should_abort = True):
 def db_wrapper_debug(func, argdict, verbose = VERBOSE):
     if verbose:
         msg = "[Test] %s(" % func.__name__
-        for k,v in argdict.iteritems():
+        for k,v in argdict.items():
             msg += " %s = %s," % (str(k), str(v))
         msg += " )"
-        print msg
+        print(msg)
     res = db_wrapper.call_db(func, argdict)
     if verbose:
-        print "\treturn: %s" % str(res)
+        print("\treturn: %s" % str(res))
     return res
 
 
