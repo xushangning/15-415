@@ -349,4 +349,110 @@ WITH attaches_with_names AS (
     \end{enumerate}
 \end{enumerate}
 
+\newpage
+
+\section*{Phase 2 - Deliverables - ph2}
+
+\begin{enumerate}[start=3]
+    \item Test plan:
+    
+    \begin{enumerate}
+        \item Reset database
+        
+        \item Create user account (Register)
+        \begin{itemize}
+            \item Duplicate user names.
+            \item User name too long.
+            \item Password too long.
+        \end{itemize}
+
+        \item Login
+        \begin{itemize}
+            \item User name not found.
+            \item Password incorrect.
+        \end{itemize}
+
+        \item Upload a paper with tags
+        \begin{itemize}
+            \item No author.
+            \item No tag.
+        \end{itemize}
+
+        \item Delete a paper
+        \begin{itemize}
+          \item Paper not found.
+          \item Associated information not deleted.
+        \end{itemize}
+
+        \item User timeline
+        \begin{itemize}
+            \item Correctness.
+        \end{itemize}
+
+        \item Global timeline
+        \begin{itemize}
+            \item Correctness.
+        \end{itemize}
+
+        \item Search for papers.
+        \begin{itemize}
+            \item Complete title match.
+            \item Complete description match.
+            \item Complete content match.
+        \end{itemize}
+
+        \item Search by a tag
+        \begin{itemize}
+            \item Correctness.
+        \end{itemize}
+
+        \item Get tags of a paper
+        \begin{itemize}
+            \item Non-existent paper.
+        \end{itemize}
+
+        \item Like/Unlike a paper
+        \begin{itemize}
+            \item Like liked paper.
+            \item Unlike unliked paper.
+            \item Non-existent paper.
+        \end{itemize}
+
+        \item Count likes
+        \begin{itemize}
+            \item Non-existent paper.
+        \end{itemize}
+
+        \item List favorite papers of a user
+        \begin{itemize}
+            \item Non-existent user.
+            \item No favorite papers.
+        \end{itemize}
+
+        \item List most popular papers
+        \begin{itemize}
+            \item No papers in the table.
+        \end{itemize}
+
+        \item Recommend papers based on likes
+        \begin{itemize}
+            \item Non-existent user.
+            \item Never liked any paper.
+            \item Liked paper not liked by anyone else.
+        \end{itemize}
+
+        \item User statistics
+        \begin{itemize}
+            \item Non-existent user.
+        \end{itemize}
+
+        \item Global statistics
+        \begin{itemize}
+            \item No users.
+            \item No tags.
+            \item No papers.
+        \end{itemize}
+    \end{enumerate}
+\end{enumerate}
+
 \end{document}
