@@ -31,3 +31,23 @@ class DbApiTestCase(TestCase):
             models.Users.objects.filter(username=test_user_name, password=test_password).count(),
             1
         )
+
+        # Duplicate insertion.
+        self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 1)
+        self.assertEqual(
+            models.Users.objects.filter(username=test_user_name, password=test_password).count(),
+            1
+        )
+
+        # Long username and password.
+        USERNAME_MAX_LENGTH = 50
+        test_user_name = 'a' * (USERNAME_MAX_LENGTH * 2)
+
+        PASSWORD_MAX_LENGTH = 32
+        test_password = 'a' * (PASSWORD_MAX_LENGTH * 2)
+
+        self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 2)
+        self.assertEqual(
+            models.Users.objects.filter(username=test_user_name, password=test_password).count(),
+            0
+        )
