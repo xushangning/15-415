@@ -140,7 +140,7 @@ def reset_db(conn):
 # Basic APIs
 
 
-def signup(conn, uname, pwd):
+def signup(conn, uname: str, pwd: str):
     """
     Register a user with a username and password.
     This function first check whether the username is used. If not, it
@@ -154,7 +154,16 @@ def signup(conn, uname, pwd):
         (1, None)   Failure -- Username is used
         (2, None)   Failure -- Other errors
     """
-    return 1, None
+    return_status = 2
+    try:
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s) '
+                       'ON CONFLICT (username) DO NOTHING', (uname, pwd))
+        conn.commit()
+        return_status = int(not cursor.rowcount)
+    except Exception:
+        pass
+    return return_status, None
 
 
 def login(conn, uname, pwd):

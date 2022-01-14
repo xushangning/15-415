@@ -7,18 +7,27 @@ from django.test import TestCase
 from django.conf import settings
 import psycopg
 
-from paper import functions
+from paper import functions, models
 
 
 class DbApiTestCase(TestCase):
+    _conn = None
 
-    def setUp(self):
-        self.conn = psycopg.connect('dbname=' + settings.DATABASES['default']['NAME'])
-        functions.reset_db(self.conn)
+    @classmethod
+    def setUpTestData(cls):
+        cls._conn = psycopg.connect('dbname=' + settings.DATABASES['default']['NAME'])
+        functions.reset_db(cls._conn)
 
-    def tearDown(self):
-        functions.reset_db(self.conn)
-        del self.conn
+    @classmethod
+    def tearDownClass(cls):
+        # Close the connection so that the test database can be deleted.
+        cls._conn.close()
 
     def test_signing_up(self):
-        self.assertEqual(functions.signup(self.conn, 'andy', 'pavlo')[0], 0)
+        test_user_name = 'andy'
+        test_password = 'pavlo'
+        self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 0)
+        self.assertEqual(
+            models.Users.objects.filter(username=test_user_name, password=test_password).count(),
+            1
+        )
