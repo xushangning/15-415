@@ -40,14 +40,23 @@ class DbApiTestCase(TestCase):
         )
 
         # Long username and password.
-        USERNAME_MAX_LENGTH = 50
-        test_user_name = 'a' * (USERNAME_MAX_LENGTH * 2)
-
-        PASSWORD_MAX_LENGTH = 32
-        test_password = 'a' * (PASSWORD_MAX_LENGTH * 2)
+        test_user_name = 'a' * (models.Users.USERNAME_MAX_LENGTH * 2)
+        test_password = 'a' * (models.Users.PASSWORD_MAX_LENGTH * 2)
 
         self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 2)
         self.assertEqual(
             models.Users.objects.filter(username=test_user_name, password=test_password).count(),
             0
         )
+
+    def test_login(self):
+        test_user_name = 'andy'
+        test_password = 'pavlo'
+        models.Users.objects.create(username=test_user_name, password=test_password)
+
+        self.assertEqual(functions.login(self._conn, test_user_name, test_password)[0], 0)
+
+        # Non-existent user.
+        self.assertEqual(functions.login(self._conn, 'wrong username', test_password)[0], 1)
+        # Wrong password.
+        self.assertEqual(functions.login(self._conn, test_user_name, 'wrong password')[0], 2)
