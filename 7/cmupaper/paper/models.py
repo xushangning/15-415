@@ -10,7 +10,8 @@ from django.db import models
 
 
 class Tagnames(models.Model):
-    tagname = models.CharField(primary_key=True, max_length=50)
+    TAG_MAX_LENGTH = 50
+    tagname = models.CharField(primary_key=True, max_length=TAG_MAX_LENGTH)
 
     class Meta:
         managed = False
@@ -39,11 +40,14 @@ class Users(models.Model):
 
 
 class Papers(models.Model):
+    TITLE_MAX_LENGTH = 50
+    DESCRIPTION_MAX_LENGTH = 500
+
     pid = models.AutoField(primary_key=True)
     username = models.ForeignKey(Users, models.DO_NOTHING, db_column='username')
-    title = models.CharField(max_length=50, blank=True, null=True)
+    title = models.CharField(max_length=TITLE_MAX_LENGTH, blank=True, null=True)
     begin_time = models.DateTimeField()
-    description = models.CharField(max_length=500, blank=True, null=True)
+    description = models.CharField(max_length=DESCRIPTION_MAX_LENGTH, blank=True, null=True)
     data = models.TextField(blank=True, null=True)
 
     class Meta:
