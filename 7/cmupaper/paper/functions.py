@@ -166,7 +166,7 @@ def signup(conn, uname: str, pwd: str):
     return return_status, None
 
 
-def login(conn, uname, pwd):
+def login(conn, uname: str, pwd: str):
     """
     Login if user and password match.
 
@@ -179,7 +179,21 @@ def login(conn, uname, pwd):
         (2, None)   Failure -- Password incorrect
         (3, None)   Failure -- Other errors
     """
-    return 1, None
+    return_status = 3
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT password = %s FROM users WHERE username = %s', (pwd, uname))
+        res = cursor.fetchall()
+        if len(res) == 0:
+            return_status = 1
+        elif res[0][0]:
+            return_status = 0
+        else:
+            return_status = 2
+    except Exception:
+        pass
+
+    return return_status, None
 
 # Event related
 
