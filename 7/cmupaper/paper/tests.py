@@ -1,8 +1,3 @@
-"""Design Choices:
-1. No test for `reset_db`. The code of `reset_db` is handed down as a definition
-for database schema that shouldn't be change. What's the point of testing
-something that can't fail, because it itself is the definition of correctness?
-"""
 from django.test import TransactionTestCase
 from django import db
 
@@ -10,6 +5,12 @@ from paper import functions, models
 
 
 class DbApiTestCase(TransactionTestCase):
+    """There is no test for `reset_db`. The code of `reset_db` is handed down as
+    a definition for database schema that shouldn't be change. What's the point
+    of testing something that can't fail, because it itself is the definition of
+    correctness?
+    """
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
