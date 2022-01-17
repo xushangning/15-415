@@ -73,7 +73,7 @@ def example_select_current_time(conn):
 # Admin APIs
 
 
-def reset_db(conn):
+def reset_db(conn: psycopg.Connection):
     """
     Reset the entire database.
     Delete all tables and then recreate them.
@@ -143,7 +143,7 @@ def reset_db(conn):
 # Basic APIs
 
 
-def signup(conn, uname: str, pwd: str):
+def signup(conn: psycopg.Connection, uname: str, pwd: str):
     """
     Register a user with a username and password.
     This function first check whether the username is used. If not, it
@@ -165,11 +165,11 @@ def signup(conn, uname: str, pwd: str):
         conn.commit()
         return_status = int(not cursor.rowcount)
     except Exception:
-        pass
+        conn.rollback()
     return return_status, None
 
 
-def login(conn, uname: str, pwd: str):
+def login(conn: psycopg.Connection, uname: str, pwd: str):
     """
     Login if user and password match.
 
@@ -194,7 +194,7 @@ def login(conn, uname: str, pwd: str):
         else:
             return_status = 2
     except Exception:
-        pass
+        conn.rollback()
 
     return return_status, None
 

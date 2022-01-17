@@ -2,7 +2,6 @@ from typing import Optional
 
 import psycopg
 from django.test import TransactionTestCase
-from django import db
 from django.conf import settings
 
 from paper import functions, models
@@ -19,8 +18,8 @@ class DbApiTestCase(TransactionTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        functions.reset_db(db.connection)
         cls._conn = psycopg.connect('dbname=' + settings.DATABASES['default']['NAME'])
+        functions.reset_db(cls._conn)
 
     @classmethod
     def tearDownClass(cls):
@@ -28,19 +27,20 @@ class DbApiTestCase(TransactionTestCase):
         super().tearDownClass()
 
     def tearDown(self):
-        db.connection.cursor().execute('TRUNCATE tags, tagnames, likes, papers, users')
+        self._conn.cursor().execute('TRUNCATE tags, tagnames, likes, papers, users')
+        self._conn.commit()
 
     def test_signing_up(self):
         test_user_name = 'andy'
         test_password = 'pavlo'
-        self.assertEqual(functions.signup(db.connection, test_user_name, test_password)[0], 0)
+        self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 0)
         self.assertEqual(
             models.Users.objects.filter(username=test_user_name, password=test_password).count(),
             1
         )
 
         # Duplicate insertion.
-        self.assertEqual(functions.signup(db.connection, test_user_name, test_password)[0], 1)
+        self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 1)
         self.assertEqual(
             models.Users.objects.filter(username=test_user_name, password=test_password).count(),
             1
@@ -50,7 +50,7 @@ class DbApiTestCase(TransactionTestCase):
         test_user_name = 'a' * (models.Users.USERNAME_MAX_LENGTH * 2)
         test_password = 'a' * (models.Users.PASSWORD_MAX_LENGTH * 2)
 
-        self.assertEqual(functions.signup(db.connection, test_user_name, test_password)[0], 2)
+        self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 2)
         self.assertEqual(
             models.Users.objects.filter(username=test_user_name, password=test_password).count(),
             0
@@ -61,12 +61,12 @@ class DbApiTestCase(TransactionTestCase):
         test_password = 'pavlo'
         models.Users.objects.create(username=test_user_name, password=test_password)
 
-        self.assertEqual(functions.login(db.connection, test_user_name, test_password)[0], 0)
+        self.assertEqual(functions.login(self._conn, test_user_name, test_password)[0], 0)
 
         # Non-existent user.
-        self.assertEqual(functions.login(db.connection, 'wrong username', test_password)[0], 1)
+        self.assertEqual(functions.login(self._conn, 'wrong username', test_password)[0], 1)
         # Wrong password.
-        self.assertEqual(functions.login(db.connection, test_user_name, 'wrong password')[0], 2)
+        self.assertEqual(functions.login(self._conn, test_user_name, 'wrong password')[0], 2)
 
     def test_adding_new_paper(self):
         test_user_name = 'andy'
