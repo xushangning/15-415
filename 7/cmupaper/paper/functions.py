@@ -2,8 +2,11 @@
 Name:
 AndrewID:
 """
+from typing import Optional
+from collections.abc import Sequence
 
 import psycopg2 as psy
+import psycopg
 
 from datetime import datetime
 from pytz import timezone
@@ -198,7 +201,8 @@ def login(conn, uname: str, pwd: str):
 # Event related
 
 
-def add_new_paper(conn, uname, title, desc, text, tags):
+def add_new_paper(conn: psycopg.Connection, uname: str, title: str, desc: Optional[str],
+                  text: Optional[str], tags: Sequence[str]) -> tuple[int, Optional[int]]:
     """
     Create a new paper with  tags.
     Note that this API should touch multiple tables.
@@ -216,7 +220,30 @@ def add_new_paper(conn, uname, title, desc, text, tags):
                     Return the pid of the newly inserted paper in the res field of the return value
         (1, None)   Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO papers (username, title, begin_time, description, data) '
+            'VALUES (%s, %s, %s, %s, %s) RETURNING pid',
+            (uname, title, datetime.now(), desc, text)
+        )
+        paper_id = cursor.fetchone()[0]
+        if len(tags):
+            cursor.executemany(
+                'INSERT INTO tagnames (tagname) VALUES (%s) ON CONFLICT DO NOTHING',
+                ((tag,) for tag in tags)
+            )
+            cursor.executemany(
+                'INSERT INTO tags (pid, tagname) VALUES (%s, %s)',
+                ((paper_id, tag) for tag in tags)
+            )
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        paper_id = None
+    return return_status, paper_id
 
 
 def delete_paper(conn, pid):

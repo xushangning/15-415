@@ -1,7 +1,9 @@
 from typing import Optional
 
+import psycopg
 from django.test import TransactionTestCase
 from django import db
+from django.conf import settings
 
 from paper import functions, models
 
@@ -12,11 +14,18 @@ class DbApiTestCase(TransactionTestCase):
     of testing something that can't fail, because it itself is the definition of
     correctness?
     """
+    _conn: Optional[psycopg.Connection] = None
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         functions.reset_db(db.connection)
+        cls._conn = psycopg.connect('dbname=' + settings.DATABASES['default']['NAME'])
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._conn.close()
+        super().tearDownClass()
 
     def tearDown(self):
         db.connection.cursor().execute('TRUNCATE tags, tagnames, likes, papers, users')
@@ -83,19 +92,19 @@ class DbApiTestCase(TransactionTestCase):
             'tags': ('mmap', 'database', 'dbms', 'dbms implementation')
         }
 
-        def assert_insertion_fail(ret: (int, Optional[int])):
+        def assert_insertion_fail(ret: tuple[int, Optional[int]]):
             self.assertEqual(ret[0], 1)
             self.assertIsNone(ret[1])
 
         # Title and description too long.
         assert_insertion_fail(functions.add_new_paper(
-            db.connection,
+            self._conn,
             test_user_name,
-            *test_paper
+            **test_paper
         ))
 
         assert_insertion_fail(functions.add_new_paper(
-            db.connection,
+            self._conn,
             test_user_name,
             'A Paper with a Very Long Tag',
             None,
@@ -106,7 +115,7 @@ class DbApiTestCase(TransactionTestCase):
         self.assertEqual(models.Papers.objects.count(), 0)
 
         return_status, paper_id = functions.add_new_paper(
-            db.connection,
+            self._conn,
             test_user_name,
             'A Paper with Only a Title',
             None,
@@ -114,12 +123,12 @@ class DbApiTestCase(TransactionTestCase):
             ()
         )
         self.assertEqual(return_status, 0)
-        self.assertEqual(models.Papers.objects.filter(pid=paper_id), 1)
+        self.assertEqual(models.Papers.objects.filter(pid=paper_id).count(), 1)
         self.assertEqual(models.Tagnames.objects.count(), 0)
         self.assertEqual(models.Tags.objects.count(), 0)
 
         return_status, paper_id = functions.add_new_paper(
-            db.connection,
+            self._conn,
             test_user_name,
             test_paper['title'][:models.Papers.TITLE_MAX_LENGTH],
             test_paper['desc'][:models.Papers.DESCRIPTION_MAX_LENGTH],
@@ -127,6 +136,6 @@ class DbApiTestCase(TransactionTestCase):
             test_paper['tags']
         )
         self.assertEqual(return_status, 0)
-        self.assertEqual(models.Papers.objects.filter(pid=paper_id), 1)
+        self.assertEqual(models.Papers.objects.filter(pid=paper_id).count(), 1)
         for tag in models.Tagnames.objects.all():
             self.assertIn(tag.tagname, test_paper['tags'])
