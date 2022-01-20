@@ -9,7 +9,7 @@ for example.
 from django.db import models
 
 
-class Tagnames(models.Model):
+class TagName(models.Model):
     TAG_MAX_LENGTH = 50
     tagname = models.CharField(primary_key=True, max_length=TAG_MAX_LENGTH)
 
@@ -18,16 +18,16 @@ class Tagnames(models.Model):
         db_table = 'tagnames'
 
 
-class Tags(models.Model):
-    pid = models.ForeignKey('Papers', models.DO_NOTHING, db_column='pid')
-    tagname = models.ForeignKey(Tagnames, models.DO_NOTHING, db_column='tagname')
+class Tag(models.Model):
+    pid = models.ForeignKey('Paper', models.DO_NOTHING, db_column='pid')
+    tagname = models.ForeignKey(TagName, models.DO_NOTHING, db_column='tagname')
 
     class Meta:
         managed = False
         db_table = 'tags'
 
 
-class Users(models.Model):
+class User(models.Model):
     USERNAME_MAX_LENGTH = 50
     PASSWORD_MAX_LENGTH = 32
 
@@ -39,12 +39,12 @@ class Users(models.Model):
         db_table = 'users'
 
 
-class Papers(models.Model):
+class Paper(models.Model):
     TITLE_MAX_LENGTH = 50
     DESCRIPTION_MAX_LENGTH = 500
 
     pid = models.AutoField(primary_key=True)
-    username = models.ForeignKey(Users, models.DO_NOTHING, db_column='username')
+    username = models.ForeignKey(User, models.DO_NOTHING, db_column='username')
     title = models.CharField(max_length=TITLE_MAX_LENGTH, blank=True, null=True)
     begin_time = models.DateTimeField()
     description = models.CharField(max_length=DESCRIPTION_MAX_LENGTH, blank=True, null=True)
@@ -55,9 +55,9 @@ class Papers(models.Model):
         db_table = 'papers'
 
 
-class Likes(models.Model):
-    pid = models.ForeignKey(Papers, models.DO_NOTHING, db_column='pid')
-    username = models.ForeignKey(Users, models.DO_NOTHING, db_column='username')
+class Like(models.Model):
+    pid = models.ForeignKey(Paper, models.DO_NOTHING, db_column='pid')
+    username = models.ForeignKey(User, models.DO_NOTHING, db_column='username')
     like_time = models.DateTimeField()
 
     class Meta:

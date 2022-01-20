@@ -35,31 +35,31 @@ class DbApiTestCase(TransactionTestCase):
         test_password = 'pavlo'
         self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 0)
         self.assertEqual(
-            models.Users.objects.filter(username=test_user_name, password=test_password).count(),
+            models.User.objects.filter(username=test_user_name, password=test_password).count(),
             1
         )
 
         # Duplicate insertion.
         self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 1)
         self.assertEqual(
-            models.Users.objects.filter(username=test_user_name, password=test_password).count(),
+            models.User.objects.filter(username=test_user_name, password=test_password).count(),
             1
         )
 
         # Long username and password.
-        test_user_name = 'a' * (models.Users.USERNAME_MAX_LENGTH * 2)
-        test_password = 'a' * (models.Users.PASSWORD_MAX_LENGTH * 2)
+        test_user_name = 'a' * (models.User.USERNAME_MAX_LENGTH * 2)
+        test_password = 'a' * (models.User.PASSWORD_MAX_LENGTH * 2)
 
         self.assertEqual(functions.signup(self._conn, test_user_name, test_password)[0], 2)
         self.assertEqual(
-            models.Users.objects.filter(username=test_user_name, password=test_password).count(),
+            models.User.objects.filter(username=test_user_name, password=test_password).count(),
             0
         )
 
     def test_login(self):
         test_user_name = 'andy'
         test_password = 'pavlo'
-        models.Users.objects.create(username=test_user_name, password=test_password)
+        models.User.objects.create(username=test_user_name, password=test_password)
 
         self.assertEqual(functions.login(self._conn, test_user_name, test_password)[0], 0)
 
@@ -71,7 +71,7 @@ class DbApiTestCase(TransactionTestCase):
     def test_adding_new_paper(self):
         test_user_name = 'andy'
         test_password = 'pavlo'
-        models.Users.objects.create(username=test_user_name, password=test_password)
+        models.User.objects.create(username=test_user_name, password=test_password)
         # https://db.cs.cmu.edu/mmap-cidr2022/
         test_paper = {
             'title': 'Are You Sure You Want to Use MMAP in Your Database Management System?',
@@ -109,10 +109,10 @@ class DbApiTestCase(TransactionTestCase):
             'A Paper with a Very Long Tag',
             None,
             None,
-            ('a' * (models.Tagnames.TAG_MAX_LENGTH * 2),)
+            ('a' * (models.TagName.TAG_MAX_LENGTH * 2),)
         ))
         # Up until now, no papers were successfully added.
-        self.assertEqual(models.Papers.objects.count(), 0)
+        self.assertEqual(models.Paper.objects.count(), 0)
 
         return_status, paper_id = functions.add_new_paper(
             self._conn,
@@ -123,19 +123,19 @@ class DbApiTestCase(TransactionTestCase):
             ()
         )
         self.assertEqual(return_status, 0)
-        self.assertEqual(models.Papers.objects.filter(pid=paper_id).count(), 1)
-        self.assertEqual(models.Tagnames.objects.count(), 0)
-        self.assertEqual(models.Tags.objects.count(), 0)
+        self.assertEqual(models.Paper.objects.filter(pid=paper_id).count(), 1)
+        self.assertEqual(models.TagName.objects.count(), 0)
+        self.assertEqual(models.Tag.objects.count(), 0)
 
         return_status, paper_id = functions.add_new_paper(
             self._conn,
             test_user_name,
-            test_paper['title'][:models.Papers.TITLE_MAX_LENGTH],
-            test_paper['desc'][:models.Papers.DESCRIPTION_MAX_LENGTH],
+            test_paper['title'][:models.Paper.TITLE_MAX_LENGTH],
+            test_paper['desc'][:models.Paper.DESCRIPTION_MAX_LENGTH],
             test_paper['text'],
             test_paper['tags']
         )
         self.assertEqual(return_status, 0)
-        self.assertEqual(models.Papers.objects.filter(pid=paper_id).count(), 1)
-        for tag in models.Tagnames.objects.all():
+        self.assertEqual(models.Paper.objects.filter(pid=paper_id).count(), 1)
+        for tag in models.TagName.objects.all():
             self.assertIn(tag.tagname, test_paper['tags'])
