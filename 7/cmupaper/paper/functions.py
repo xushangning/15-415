@@ -246,7 +246,7 @@ def add_new_paper(conn: psycopg.Connection, uname: str, title: str, desc: Option
     return return_status, paper_id
 
 
-def delete_paper(conn, pid):
+def delete_paper(conn: psycopg.Connection, pid: int) -> tuple[int, None]:
     """
     Delete a paper by the given pid.
 
@@ -256,7 +256,15 @@ def delete_paper(conn, pid):
         (0, None)   Success
         (1, None)   Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM papers WHERE pid = %s', (pid,))
+        conn.commit()
+        return_status = int(cursor.rowcount != 1)
+    except Exception:
+        conn.rollback()
+    return return_status, None
 
 
 def get_paper_tags(conn, pid):
