@@ -5,6 +5,12 @@ like [multi-column primary keys](https://stackoverflow.com/questions/4871966/mak
 or [enforcing foreign key constraints](https://code.djangoproject.com/ticket/21961).
 If tables are created with migration, they won't have multi-column primary keys,
 for example.
+2. In models for many-to-many relationships like `Tag` and `Like`, we designate
+a random column as the primary key so that ORM won't generate INSERT statements
+that try to insert values into the ID column, which is automatically generated
+by Django if there is no primary key. This work-around may have serious
+implications e.g., when you want to delete a row in a many-to-many table using
+the primary key. We will write raw SQL in such cases.
 """
 from django.db import models
 
@@ -19,7 +25,7 @@ class TagName(models.Model):
 
 
 class Tag(models.Model):
-    pid = models.ForeignKey('Paper', models.DO_NOTHING, db_column='pid')
+    pid = models.ForeignKey('Paper', models.DO_NOTHING, db_column='pid', primary_key=True)
     tagname = models.ForeignKey(TagName, models.DO_NOTHING, db_column='tagname')
 
     class Meta:
@@ -49,6 +55,12 @@ class Paper(models.Model):
     begin_time = models.DateTimeField()
     description = models.CharField(max_length=DESCRIPTION_MAX_LENGTH, blank=True, null=True)
     data = models.TextField(blank=True, null=True)
+    tag_names = models.ManyToManyField(TagName, through=Tag, through_fields=('pid', 'tagname'))
+    liked_users = models.ManyToManyField(
+        User,
+        through='Like', through_fields=('pid', 'username'),
+        related_name='liked_papers',
+    )
 
     class Meta:
         managed = False
@@ -56,7 +68,7 @@ class Paper(models.Model):
 
 
 class Like(models.Model):
-    pid = models.ForeignKey(Paper, models.DO_NOTHING, db_column='pid')
+    pid = models.ForeignKey(Paper, models.DO_NOTHING, db_column='pid', primary_key=True)
     username = models.ForeignKey(User, models.DO_NOTHING, db_column='username')
     like_time = models.DateTimeField()
 

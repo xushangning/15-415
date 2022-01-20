@@ -3,6 +3,7 @@ from typing import Optional
 import psycopg
 from django.test import TransactionTestCase
 from django.conf import settings
+from django.utils import timezone
 
 from paper import functions, models
 
@@ -139,3 +140,27 @@ class DbApiTestCase(TransactionTestCase):
         self.assertEqual(models.Paper.objects.filter(pid=paper_id).count(), 1)
         for tag in models.TagName.objects.all():
             self.assertIn(tag.tagname, test_paper['tags'])
+
+    def test_deleting_paper(self):
+        # Delete a paper that doesn't exist.
+        self.assertEqual(functions.delete_paper(self._conn, 100)[0], 1)
+
+        test_paper = models.Paper.objects.create(
+            title='A Paper',
+            username=models.User.objects.create(username='uploader', password='uploader'),
+            begin_time=timezone.now()
+        )
+        test_tag = models.TagName.objects.create(tagname='tag')
+        models.Tag.objects.create(pid=test_paper, tagname=test_tag)
+        models.Like.objects.create(
+            pid=test_paper,
+            username=models.User.objects.create(
+                username='user_who_likes_paper',
+                password='another_user'
+            ),
+            like_time=timezone.now()
+        )
+        self.assertEqual(functions.delete_paper(self._conn, test_paper.pid)[0], 0)
+        # Check cascade deletion.
+        self.assertEqual(models.Tag.objects.count(), 0)
+        self.assertEqual(models.Like.objects.count(), 0)

@@ -125,4 +125,9 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SILENCED_SYSTEM_CHECKS = ['models.W042']
+SILENCED_SYSTEM_CHECKS = [
+    'models.W042',
+    # No warning for making a random column the primary key in a table for a
+    # many-to-many relationship.
+    'fields.W342'
+]
