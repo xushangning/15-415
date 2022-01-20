@@ -164,3 +164,27 @@ class DbApiTestCase(TransactionTestCase):
         # Check cascade deletion.
         self.assertEqual(models.Tag.objects.count(), 0)
         self.assertEqual(models.Like.objects.count(), 0)
+
+    def test_getting_paper_tags(self):
+        # Non-existent paper.
+        self.assertEqual(functions.get_paper_tags(self._conn, 100)[0], 1)
+
+        test_paper = models.Paper.objects.create(
+            title='A Paper with So Many Tags',
+            username=models.User.objects.create(username='uploader', password='uploader'),
+            begin_time=timezone.now()
+        )
+        # First no tags.
+        return_status, tags = functions.get_paper_tags(self._conn, test_paper.pid)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(len(tags), 0)
+
+        N_TAGS = 20
+        for i in range(N_TAGS):
+            models.Tag.objects.create(
+                pid=test_paper,
+                tagname=models.TagName.objects.create(tagname=str(i))
+            )
+        return_status, tags = functions.get_paper_tags(self._conn, test_paper.pid)
+        self.assertEqual(return_status, 0)
+        self.assertTrue(all(int(tag) == i for i, tag in enumerate(tags)))
