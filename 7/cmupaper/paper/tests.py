@@ -179,12 +179,14 @@ class DbApiTestCase(TransactionTestCase):
         self.assertEqual(return_status, 0)
         self.assertEqual(len(tags), 0)
 
-        N_TAGS = 20
-        for i in range(N_TAGS):
+        tags = [str(i) for i in range(20)]
+        for tag in tags:
             models.Tag.objects.create(
                 pid=test_paper,
-                tagname=models.TagName.objects.create(tagname=str(i))
+                tagname=models.TagName.objects.create(tagname=tag)
             )
-        return_status, tags = functions.get_paper_tags(self._conn, test_paper.pid)
+        return_status, returned_tags = functions.get_paper_tags(self._conn, test_paper.pid)
         self.assertEqual(return_status, 0)
-        self.assertTrue(all(int(tag) == i for i, tag in enumerate(tags)))
+        # Returned tags should be sorted in lexicographical order.
+        tags.sort()
+        self.assertTrue(tags == returned_tags)

@@ -267,7 +267,7 @@ def delete_paper(conn: psycopg.Connection, pid: int) -> tuple[int, None]:
     return return_status, None
 
 
-def get_paper_tags(conn, pid):
+def get_paper_tags(conn: psycopg.Connection, pid: int) -> tuple[int, Optional[list[str]]]:
     """
     Get all tags of a paper
 
@@ -282,7 +282,28 @@ def get_paper_tags(conn, pid):
 
         (1, None)                   Failure
     """
-    return 1, None
+    try:
+        return_status = 0
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT tagname FROM tags WHERE pid = %s ORDER BY tagname',
+            (pid,)
+        )
+        tags = cursor.fetchall()
+        if len(tags):
+            tags = [tag[0] for tag in tags]
+        else:
+            # Check if the paper exists.
+            cursor.execute('SELECT COUNT(*) FROM papers WHERE pid = %s', (pid,))
+            if cursor.fetchone()[0] == 0:
+                return_status = 1
+                tags = None
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        return_status = 1
+        tags = None
+    return return_status, tags
 
 # Vote related
 
