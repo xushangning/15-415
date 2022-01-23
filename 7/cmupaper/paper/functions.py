@@ -2,7 +2,7 @@
 Name:
 AndrewID:
 """
-from typing import Optional
+from typing import Optional, Any
 from collections.abc import Sequence
 
 import psycopg2 as psy
@@ -73,7 +73,7 @@ def example_select_current_time(conn):
 # Admin APIs
 
 
-def reset_db(conn: psycopg.Connection):
+def reset_db(conn: psycopg.Connection[tuple[Any, ...]]):
     """
     Reset the entire database.
     Delete all tables and then recreate them.
@@ -143,7 +143,7 @@ def reset_db(conn: psycopg.Connection):
 # Basic APIs
 
 
-def signup(conn: psycopg.Connection, uname: str, pwd: str):
+def signup(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pwd: str):
     """
     Register a user with a username and password.
     This function first check whether the username is used. If not, it
@@ -169,7 +169,7 @@ def signup(conn: psycopg.Connection, uname: str, pwd: str):
     return return_status, None
 
 
-def login(conn: psycopg.Connection, uname: str, pwd: str):
+def login(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pwd: str):
     """
     Login if user and password match.
 
@@ -201,7 +201,7 @@ def login(conn: psycopg.Connection, uname: str, pwd: str):
 # Event related
 
 
-def add_new_paper(conn: psycopg.Connection, uname: str, title: str, desc: Optional[str],
+def add_new_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, title: str, desc: Optional[str],
                   text: Optional[str], tags: Sequence[str]) -> tuple[int, Optional[int]]:
     """
     Create a new paper with  tags.
@@ -246,7 +246,7 @@ def add_new_paper(conn: psycopg.Connection, uname: str, title: str, desc: Option
     return return_status, paper_id
 
 
-def delete_paper(conn: psycopg.Connection, pid: int) -> tuple[int, None]:
+def delete_paper(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[int, None]:
     """
     Delete a paper by the given pid.
 
@@ -267,7 +267,7 @@ def delete_paper(conn: psycopg.Connection, pid: int) -> tuple[int, None]:
     return return_status, None
 
 
-def get_paper_tags(conn: psycopg.Connection, pid: int) -> tuple[int, Optional[list[str]]]:
+def get_paper_tags(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[int, Optional[list[str]]]:
     """
     Get all tags of a paper
 
@@ -308,7 +308,7 @@ def get_paper_tags(conn: psycopg.Connection, pid: int) -> tuple[int, Optional[li
 # Vote related
 
 
-def like_paper(conn: psycopg.Connection, uname: str, pid: int) -> tuple[int, None]:
+def like_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pid: int) -> tuple[int, None]:
     """
     Record a like for a paper. Timestamped the like with the current timestamp
 

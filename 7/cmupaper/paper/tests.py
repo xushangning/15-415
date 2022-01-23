@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 import psycopg
 from django.test import TransactionTestCase
@@ -14,7 +14,7 @@ class DbApiTestCase(TransactionTestCase):
     of testing something that can't fail, because it itself is the definition of
     correctness?
     """
-    _conn: Optional[psycopg.Connection] = None
+    _conn: Optional[psycopg.Connection[tuple[Any, ...]]] = None
     _uploader: Optional[models.User] = None
     _paper: Optional[models.Paper] = None
 
