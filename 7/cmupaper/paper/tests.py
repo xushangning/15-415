@@ -15,12 +15,24 @@ class DbApiTestCase(TransactionTestCase):
     correctness?
     """
     _conn: Optional[psycopg.Connection] = None
+    _uploader: Optional[models.User] = None
+    _paper: Optional[models.Paper] = None
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls._conn = psycopg.connect('dbname=' + settings.DATABASES['default']['NAME'])
         functions.reset_db(cls._conn)
+
+        cls._uploader = models.User(username='uploader', password='uploader')
+        cls._paper = models.Paper(
+            title='A Very Versatile Paper for Testing',
+            username=cls._uploader,
+            description='This paper is for testing purposes only.',
+            data='This is the data for the paper.',
+            begin_time=timezone.now()
+
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -190,3 +202,49 @@ class DbApiTestCase(TransactionTestCase):
         # Returned tags should be sorted in lexicographical order.
         tags.sort()
         self.assertTrue(tags == returned_tags)
+
+    def test_liking_paper(self):
+        self._uploader.save()
+        self._paper.save()
+        # The uploader can't like their own paper.
+        self.assertEqual(functions.like_paper(self._conn, self._uploader.username, self._paper.pid)[0], 1)
+        self.assertEqual(models.Like.objects.count(), 0)
+
+        liker = models.User.objects.create(username='liker', password='liker')
+        self.assertEqual(functions.like_paper(self._conn, liker.username, self._paper.pid)[0], 0)
+        # One can't like a paper twice.
+        self.assertEqual(functions.like_paper(self._conn, liker.username, self._paper.pid)[0], 1)
+        self.assertEqual(models.Like.objects.count(), 1)
+
+    def test_unliking_paper(self):
+        self._uploader.save()
+        self._paper.save()
+        liker = models.User.objects.create(username='liker', password='liker')
+
+        # You can only unlike a liked paper.
+        self.assertEqual(functions.unlike_paper(self._conn, liker.username, self._paper.pid)[0], 1)
+
+        models.Like.objects.create(pid=self._paper, username=liker, like_time=timezone.now())
+        self.assertEqual(functions.unlike_paper(self._conn, liker.username, self._paper.pid)[0], 0)
+        self.assertEqual(models.Like.objects.count(), 0)
+
+    def test_getting_likes(self):
+        self._uploader.save()
+        test_paper = models.Paper.objects.create(
+            title='1',
+            username=self._uploader,
+            begin_time=timezone.now()
+        )
+
+        # No likes.
+        return_status, likes = functions.get_likes(self._conn, test_paper.pid)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(likes, 0)
+
+        alice = models.User.objects.create(username='alice', password='alice')
+        bob = models.User.objects.create(username='bob', password='bob')
+        models.Like.objects.create(pid=test_paper, username=alice, like_time=timezone.now())
+        models.Like.objects.create(pid=test_paper, username=bob, like_time=timezone.now())
+        return_status, likes = functions.get_likes(self._conn, test_paper.pid)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(likes, 2)
