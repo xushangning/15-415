@@ -366,7 +366,7 @@ def unlike_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pid: int
     return return_status, None
 
 
-def get_likes(conn, pid):
+def get_likes(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[int, Optional[int]]:
     """
     Get the number of likes of a paper
 
@@ -376,7 +376,17 @@ def get_likes(conn, pid):
         (0, like_count)     Success, retval should be an integer of like count
         (1, None)           Failure
     """
-    return 1, None
+    return_status = 1
+    like_count = None
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM likes WHERE pid = %s', (pid,))
+        like_count = cursor.fetchone()[0]
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+    return return_status, like_count
 
 # Search related
 
