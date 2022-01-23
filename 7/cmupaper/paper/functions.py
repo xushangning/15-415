@@ -338,7 +338,7 @@ def like_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pid: int) 
     return return_status, None
 
 
-def unlike_paper(conn, uname, pid):
+def unlike_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pid: int) -> tuple[int, None]:
     """
     Record an unlike for a paper
 
@@ -351,7 +351,19 @@ def unlike_paper(conn, uname, pid):
         (0, None)   Success
         (1, None)   Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'DELETE FROM likes WHERE username = %s AND pid = %s',
+            (uname, pid)
+        )
+        conn.commit()
+        return_status = int(cursor.rowcount != 1)
+    except Exception:
+        conn.rollback()
+        return_status = 1
+    return return_status, None
 
 
 def get_likes(conn, pid):
