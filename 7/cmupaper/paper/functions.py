@@ -308,7 +308,7 @@ def get_paper_tags(conn: psycopg.Connection, pid: int) -> tuple[int, Optional[li
 # Vote related
 
 
-def like_paper(conn, uname, pid):
+def like_paper(conn: psycopg.Connection, uname: str, pid: int) -> tuple[int, None]:
     """
     Record a like for a paper. Timestamped the like with the current timestamp
 
@@ -321,7 +321,21 @@ def like_paper(conn, uname, pid):
         (0, None)   Success
         (1, None)   Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT username = %s FROM papers WHERE pid = %s', (uname, pid))
+        if not cursor.fetchone()[0]:
+            cursor.execute(
+                'INSERT INTO likes (username, pid, like_time) VALUES (%s, %s, %s)',
+                (uname, pid, datetime.now())
+            )
+            return_status = 0
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        return_status = 1
+    return return_status, None
 
 
 def unlike_paper(conn, uname, pid):
