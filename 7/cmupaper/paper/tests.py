@@ -228,23 +228,164 @@ class DbApiTestCase(TransactionTestCase):
         self.assertEqual(functions.unlike_paper(self._conn, liker.username, self._paper.pid)[0], 0)
         self.assertEqual(models.Like.objects.count(), 0)
 
-    def test_getting_likes(self):
+    def test_statistics(self):
         self._uploader.save()
-        test_paper = models.Paper.objects.create(
-            title='1',
-            username=self._uploader,
-            begin_time=timezone.now()
-        )
+
+        # Test APIs on an (almost) empty database.
+        return_status, returned_papers = functions.get_timeline(self._conn, self._uploader.username)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(len(returned_papers), 0)
+        return_status, returned_papers = functions.get_timeline_all(self._conn)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(len(returned_papers), 0)
+
+        return_status, returned_papers = functions.get_papers_by_keyword(self._conn, '4')
+        self.assertEqual(return_status, 0)
+        self.assertEqual(len(returned_papers), 0)
+
+        papers = tuple(map(
+            lambda i: models.Paper.objects.create(
+                title=str(i),
+                username=self._uploader,
+                begin_time=timezone.now()
+            ),
+            range(4)
+        ))
+        papers[0].description = '1 2 3 4 5 6 7 8 9'
+        papers[0].save()
+        papers[1].data = '1 2 3 4 5 6 7 8 9'
+        papers[1].save()
 
         # No likes.
-        return_status, likes = functions.get_likes(self._conn, test_paper.pid)
+        return_status, likes = functions.get_likes(self._conn, papers[0].pid)
         self.assertEqual(return_status, 0)
         self.assertEqual(likes, 0)
 
+        # The following users, papers and like relationships are recreated from
+        # Figure 1 in Homework 7.
         alice = models.User.objects.create(username='alice', password='alice')
         bob = models.User.objects.create(username='bob', password='bob')
-        models.Like.objects.create(pid=test_paper, username=alice, like_time=timezone.now())
-        models.Like.objects.create(pid=test_paper, username=bob, like_time=timezone.now())
-        return_status, likes = functions.get_likes(self._conn, test_paper.pid)
+        cindy = models.User.objects.create(username='cindy', password='cindy')
+        eve = models.User.objects.create(username='eve', password='eve')
+
+        models.Like.objects.create(pid=papers[0], username=alice, like_time=timezone.now())
+        models.Like.objects.create(pid=papers[0], username=bob, like_time=timezone.now())
+        # We will call get_most_popular_papers with
+        # begin_time=most_popular_paper_time.
+        most_popular_paper_time = timezone.now()
+        models.Like.objects.create(pid=papers[0], username=eve, like_time=timezone.now())
+        models.Like.objects.create(pid=papers[1], username=bob, like_time=timezone.now())
+        models.Like.objects.create(pid=papers[1], username=eve, like_time=timezone.now())
+        models.Like.objects.create(pid=papers[2], username=cindy, like_time=timezone.now())
+        models.Like.objects.create(pid=papers[3], username=cindy, like_time=timezone.now())
+        models.Like.objects.create(pid=papers[3], username=eve, like_time=timezone.now())
+
+        return_status, likes = functions.get_likes(self._conn, papers[0].pid)
         self.assertEqual(return_status, 0)
-        self.assertEqual(likes, 2)
+        self.assertEqual(likes, 3)
+
+        return_status, returned_papers = functions.get_timeline(
+            self._conn,
+            self._uploader.username,
+            count=3
+        )
+        self.assertEqual(return_status, 0)
+        # Check papers are returned in chronological order (most recent first).
+        self.assertTrue(all(
+            paper[2] == title
+            for paper, title in zip(returned_papers, (p.title for p in reversed(papers[-3:])))
+        ))
+
+        return_status, returned_papers = functions.get_timeline_all(self._conn, count=2)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(returned_papers[0][2], papers[3].title)
+        self.assertEqual(returned_papers[1][2], papers[2].title)
+
+        # A paper that nobody likes shouldn't be returned.
+        self._paper.save()
+        return_status, returned_papers = functions.get_most_popular_papers(
+            self._conn,
+            begin_time=most_popular_paper_time
+        )
+        self.assertEqual(return_status, 0)
+        # Check papers are returned in descending order of the number of likes,
+        # with ties broken by pid.
+        self.assertTrue(all(
+            paper[2] == str(i) for paper, i in zip(returned_papers, (3, 1, 2, 0))
+        ))
+
+        return_status, returned_papers = functions.get_recommend_papers(
+            self._conn, alice.username
+        )
+        self.assertEqual(return_status, 0)
+        self.assertEqual(returned_papers[0][2], papers[1].title)
+        self.assertEqual(returned_papers[1][2], papers[3].title)
+
+        tags = tuple(map(
+            lambda i: models.TagName.objects.create(tagname=str(i)),
+            range(3)
+        ))
+        return_status, returned_papers = functions.get_papers_by_tag(
+            self._conn,
+            tags[0].tagname
+        )
+        self.assertEqual(return_status, 0)
+        self.assertEqual(len(returned_papers), 0)
+
+        for paper in papers:
+            models.Tag.objects.create(pid=paper, tagname=tags[0])
+        models.Tag.objects.create(pid=papers[0], tagname=tags[1])
+        models.Tag.objects.create(pid=papers[1], tagname=tags[1])
+        models.Tag.objects.create(pid=papers[1], tagname=tags[2])
+
+        return_status, returned_papers = functions.get_papers_by_tag(
+            self._conn, tags[0].tagname, count=2
+        )
+        self.assertEqual(return_status, 0)
+        self.assertTrue(all(
+            paper[2] == title
+            for paper, title in zip(returned_papers, (p.title for p in reversed(papers[-2:])))
+        ))
+
+        return_status, returned_papers = functions.get_papers_by_keyword(self._conn, '3')
+        self.assertEqual(return_status, 0)
+        self.assertEqual(returned_papers[0][2], papers[3].title)
+        self.assertEqual(returned_papers[1][2], papers[1].title)
+        self.assertEqual(returned_papers[2][2], papers[0].title)
+
+        return_status, returned_papers = functions.get_papers_by_liked(
+            self._conn, eve.username, count=2
+        )
+        self.assertEqual(return_status, 0)
+        self.assertEqual(returned_papers[0][2], papers[3].title)
+        self.assertEqual(returned_papers[1][2], papers[2].title)
+
+        return_status, returned_users = functions.get_most_active_users(self._conn, count=10)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(returned_users, [self._uploader.username])
+
+        return_status, returned_tags = functions.get_most_popular_tags(self._conn, count=2)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(returned_tags, [tags[0].tagname, tags[1].tagname])
+
+        return_status, returned_tag_pairs = functions.get_most_popular_tag_pairs(
+            self._conn, count=3
+        )
+        self.assertEqual(return_status, 0)
+        self.assertEqual(returned_tag_pairs, [
+            (tags[0].tagname, tags[1].tagname),
+            (tags[0].tagname, tags[2].tagname),
+            (tags[1].tagname, tags[2].tagname)
+        ])
+
+        return_status, count = functions.get_number_papers_user(self._conn, self._uploader.username)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(count, len(papers))
+
+        return_status, count = functions.get_number_liked_user(self._conn, cindy.username)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(count, 2)
+
+        return_status, count = functions.get_number_tags_user(self._conn, self._uploader.username)
+        self.assertEqual(return_status, 0)
+        self.assertEqual(count, 3)
