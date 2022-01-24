@@ -270,9 +270,6 @@ class DbApiTestCase(TransactionTestCase):
 
         models.Like.objects.create(pid=papers[0], username=alice, like_time=timezone.now())
         models.Like.objects.create(pid=papers[0], username=bob, like_time=timezone.now())
-        # We will call get_most_popular_papers with
-        # begin_time=most_popular_paper_time.
-        most_popular_paper_time = timezone.now()
         models.Like.objects.create(pid=papers[0], username=eve, like_time=timezone.now())
         models.Like.objects.create(pid=papers[1], username=bob, like_time=timezone.now())
         models.Like.objects.create(pid=papers[1], username=eve, like_time=timezone.now())
@@ -305,13 +302,13 @@ class DbApiTestCase(TransactionTestCase):
         self._paper.save()
         return_status, returned_papers = functions.get_most_popular_papers(
             self._conn,
-            begin_time=most_popular_paper_time
+            begin_time=papers[0].begin_time.replace(tzinfo=None)
         )
         self.assertEqual(return_status, 0)
         # Check papers are returned in descending order of the number of likes,
         # with ties broken by pid.
-        self.assertTrue(all(
-            paper[2] == str(i) for paper, i in zip(returned_papers, (3, 1, 2, 0))
+        self.assertTrue(len(returned_papers) and all(
+            paper[2] == str(i) for paper, i in zip(returned_papers, (1, 3, 2))
         ))
 
         return_status, returned_papers = functions.get_recommend_papers(
