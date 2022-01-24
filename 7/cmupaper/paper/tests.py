@@ -363,7 +363,7 @@ class DbApiTestCase(TransactionTestCase):
 
         return_status, returned_tags = functions.get_most_popular_tags(self._conn, count=2)
         self.assertEqual(return_status, 0)
-        self.assertEqual(returned_tags, [tags[0].tagname, tags[1].tagname])
+        self.assertEqual(returned_tags, [(tags[0].tagname, 4), (tags[1].tagname, 2)])
 
         return_status, returned_tag_pairs = functions.get_most_popular_tag_pairs(
             self._conn, count=3

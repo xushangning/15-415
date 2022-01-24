@@ -697,7 +697,7 @@ def get_most_active_users(conn: Connection, count=1) -> tuple[int, Optional[list
     return return_status, users
 
 
-def get_most_popular_tags(conn, count = 1):
+def get_most_popular_tags(conn: Connection, count=1) -> tuple[int, Optional[list[tuple[str, int], ...]]]:
     """
     Get at most $count many tags that gets most used among all papers
 
@@ -713,7 +713,21 @@ def get_most_popular_tags(conn, count = 1):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT tagname, COUNT(*) as tag_count FROM tags GROUP BY tagname '
+            'ORDER BY tag_count DESC, tagname LIMIT %s',
+            (count,)
+        )
+        tags_and_count = cursor.fetchall()
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        tags_and_count = None
+    return return_status, tags_and_count
 
 
 def get_most_popular_tag_pairs(conn, count = 1):
