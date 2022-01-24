@@ -508,7 +508,8 @@ def get_most_popular_papers(conn: psycopg.Connection[tuple[Any, ...]], begin_tim
     return return_status, papers
 
 
-def get_recommend_papers(conn, uname, count = 10):
+def get_recommend_papers(conn: psycopg.Connection[tuple[Any, ...]], uname: str, count=10)\
+        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
     """
     Recommended at most $count papers for a user.
 
@@ -524,7 +525,26 @@ def get_recommend_papers(conn, uname, count = 10):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'WITH liked_papers AS (SELECT DISTINCT pid FROM likes WHERE username = %s), '
+            'recommended_papers AS (SELECT pid, COUNT(*) AS like_count FROM likes '
+            'WHERE username IN (SELECT DISTINCT username FROM likes WHERE pid IN (SELECT * FROM liked_papers)) '
+            'AND pid NOT IN (SELECT * FROM liked_papers) '
+            'GROUP BY pid) '
+            'SELECT pid, username, title, begin_time, description FROM papers '
+            'JOIN recommended_papers USING (pid) ORDER BY like_count DESC, pid LIMIT %s',
+            (uname, count)
+        )
+        papers = cursor.fetchall()
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        papers = None
+    return return_status, papers
 
 
 def get_papers_by_tag(conn, tag, count = 10):
