@@ -529,11 +529,17 @@ def get_papers_by_tag(conn, tag, count = 10):
     return 1, None
 
 
-def get_papers_by_keyword(conn, keyword, count = 10):
+def get_papers_by_keyword(conn: psycopg.Connection[tuple[Any, ...]], keyword: str, count=10)\
+        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
     """
     Get at most $count papers that match a keyword in its title, description *or* text field
 
     The result should first be ordered by begin time (newest first). Break ties by pid (ascending).
+
+    The GIN index on the data field is so stupid. Because the index is only on
+    the data field, searches on title and description still require a full scan
+    anyway, rendering the index useless. The correct approach is to create an
+    index on concatenation of the three fields.
 
     :param conn: A postgres database connection object
     :param keyword: A string of keyword, e.g. "database"
@@ -545,7 +551,24 @@ def get_papers_by_keyword(conn, keyword, count = 10):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT pid, username, title, begin_time, description FROM papers "
+            "WHERE title LIKE '%%' || %s || '%%' "
+            "OR description LIKE '%%' || %s || '%%' "
+            "OR to_tsquery('english', %s) @@ to_tsvector('english', data) "
+            "ORDER BY begin_time DESC, pid LIMIT %s",
+            (keyword, keyword, keyword, count)
+        )
+        papers = cursor.fetchall()
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        papers = None
+    return return_status, papers
 
 
 def get_papers_by_liked(conn, uname, count = 10):
