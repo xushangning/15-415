@@ -288,7 +288,7 @@ class DbApiTestCase(TransactionTestCase):
         )
         self.assertEqual(return_status, 0)
         # Check papers are returned in chronological order (most recent first).
-        self.assertTrue(all(
+        self.assertTrue(len(returned_papers) and all(
             paper[2] == title
             for paper, title in zip(returned_papers, (p.title for p in reversed(papers[-3:])))
         ))
@@ -339,7 +339,7 @@ class DbApiTestCase(TransactionTestCase):
             self._conn, tags[0].tagname, count=2
         )
         self.assertEqual(return_status, 0)
-        self.assertTrue(all(
+        self.assertTrue(len(returned_papers) and all(
             paper[2] == title
             for paper, title in zip(returned_papers, (p.title for p in reversed(papers[-2:])))
         ))
