@@ -552,7 +552,7 @@ def get_recommend_papers(conn: Connection, uname: str, count=10)\
     return return_status, papers
 
 
-def get_papers_by_tag(conn, tag, count = 10):
+def get_papers_by_tag(conn: Connection, tag: str, count=10) -> tuple[int, Optional[list[Paper, ...]]]:
     """
     Get at most $count papers that have the given tag
 
@@ -568,7 +568,21 @@ def get_papers_by_tag(conn, tag, count = 10):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT pid, username, title, begin_time, description FROM papers '
+            'JOIN tags USING (pid) WHERE tagname = %s ORDER BY begin_time DESC, pid LIMIT %s',
+            (tag, count)
+        )
+        papers = cursor.fetchall()
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        papers = None
+    return return_status, papers
 
 
 def get_papers_by_keyword(conn: Connection, keyword: str, count=10)\
