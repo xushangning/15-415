@@ -355,7 +355,7 @@ class DbApiTestCase(TransactionTestCase):
         )
         self.assertEqual(return_status, 0)
         self.assertEqual(returned_papers[0][2], papers[3].title)
-        self.assertEqual(returned_papers[1][2], papers[2].title)
+        self.assertEqual(returned_papers[1][2], papers[1].title)
 
         return_status, returned_users = functions.get_most_active_users(self._conn, count=10)
         self.assertEqual(return_status, 0)
