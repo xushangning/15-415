@@ -664,7 +664,7 @@ def get_papers_by_liked(conn: Connection, uname: str, count=10) -> tuple[int, Op
 # Statistics related
 
 
-def get_most_active_users(conn, count = 1):
+def get_most_active_users(conn: Connection, count=1) -> tuple[int, Optional[list[str, ...]]]:
     """
     Get at most $count users that post most papers.
 
@@ -680,7 +680,21 @@ def get_most_active_users(conn, count = 1):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT username FROM papers GROUP BY username '
+            'ORDER BY COUNT(*) DESC, username LIMIT %s',
+            (count,)
+        )
+        users = [row[0] for row in cursor.fetchall()]
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        users = None
+    return return_status, users
 
 
 def get_most_popular_tags(conn, count = 1):
