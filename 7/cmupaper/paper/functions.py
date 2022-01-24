@@ -44,6 +44,11 @@ General rules:
     set to None. Otherwise it could be any python data structures or primitives.
 """
 
+Connection = psycopg.Connection[tuple[Any, ...]]
+"""Type of psycopg.Connection we are using"""
+
+Paper = tuple[int, str, str, datetime, str]
+
 
 def example_select_current_time(conn):
     """
@@ -73,7 +78,7 @@ def example_select_current_time(conn):
 # Admin APIs
 
 
-def reset_db(conn: psycopg.Connection[tuple[Any, ...]]):
+def reset_db(conn: Connection):
     """
     Reset the entire database.
     Delete all tables and then recreate them.
@@ -143,7 +148,7 @@ def reset_db(conn: psycopg.Connection[tuple[Any, ...]]):
 # Basic APIs
 
 
-def signup(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pwd: str):
+def signup(conn: Connection, uname: str, pwd: str):
     """
     Register a user with a username and password.
     This function first check whether the username is used. If not, it
@@ -169,7 +174,7 @@ def signup(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pwd: str):
     return return_status, None
 
 
-def login(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pwd: str):
+def login(conn: Connection, uname: str, pwd: str):
     """
     Login if user and password match.
 
@@ -201,7 +206,7 @@ def login(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pwd: str):
 # Event related
 
 
-def add_new_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, title: str, desc: Optional[str],
+def add_new_paper(conn: Connection, uname: str, title: str, desc: Optional[str],
                   text: Optional[str], tags: Sequence[str]) -> tuple[int, Optional[int]]:
     """
     Create a new paper with  tags.
@@ -246,7 +251,7 @@ def add_new_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, title: 
     return return_status, paper_id
 
 
-def delete_paper(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[int, None]:
+def delete_paper(conn: Connection, pid: int) -> tuple[int, None]:
     """
     Delete a paper by the given pid.
 
@@ -267,7 +272,7 @@ def delete_paper(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[i
     return return_status, None
 
 
-def get_paper_tags(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[int, Optional[list[str]]]:
+def get_paper_tags(conn: Connection, pid: int) -> tuple[int, Optional[list[str]]]:
     """
     Get all tags of a paper
 
@@ -308,7 +313,7 @@ def get_paper_tags(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple
 # Vote related
 
 
-def like_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pid: int) -> tuple[int, None]:
+def like_paper(conn: Connection, uname: str, pid: int) -> tuple[int, None]:
     """
     Record a like for a paper. Timestamped the like with the current timestamp
 
@@ -338,7 +343,7 @@ def like_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pid: int) 
     return return_status, None
 
 
-def unlike_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pid: int) -> tuple[int, None]:
+def unlike_paper(conn: Connection, uname: str, pid: int) -> tuple[int, None]:
     """
     Record an unlike for a paper
 
@@ -366,7 +371,7 @@ def unlike_paper(conn: psycopg.Connection[tuple[Any, ...]], uname: str, pid: int
     return return_status, None
 
 
-def get_likes(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[int, Optional[int]]:
+def get_likes(conn: Connection, pid: int) -> tuple[int, Optional[int]]:
     """
     Get the number of likes of a paper
 
@@ -391,8 +396,8 @@ def get_likes(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[int,
 # Search related
 
 
-def get_timeline(conn: psycopg.Connection[tuple[Any, ...]], uname: str, count=10)\
-        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
+def get_timeline(conn: Connection, uname: str, count=10)\
+        -> tuple[int, Optional[list[Paper, ...]]]:
     """
     Get timeline of a user.
 
@@ -438,8 +443,8 @@ def get_timeline(conn: psycopg.Connection[tuple[Any, ...]], uname: str, count=10
     return return_status, papers
 
 
-def get_timeline_all(conn: psycopg.Connection[tuple[Any, ...]], count=10)\
-        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
+def get_timeline_all(conn: Connection, count=10)\
+        -> tuple[int, Optional[list[Paper, ...]]]:
     """
     Get at most $count recent papers
 
@@ -471,8 +476,8 @@ def get_timeline_all(conn: psycopg.Connection[tuple[Any, ...]], count=10)\
     return return_status, papers
 
 
-def get_most_popular_papers(conn: psycopg.Connection[tuple[Any, ...]], begin_time: datetime, count=10)\
-        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
+def get_most_popular_papers(conn: Connection, begin_time: datetime, count=10)\
+        -> tuple[int, Optional[list[Paper, ...]]]:
     """
     Get at most $count papers posted after $begin_time according that have the most likes.
 
@@ -508,8 +513,8 @@ def get_most_popular_papers(conn: psycopg.Connection[tuple[Any, ...]], begin_tim
     return return_status, papers
 
 
-def get_recommend_papers(conn: psycopg.Connection[tuple[Any, ...]], uname: str, count=10)\
-        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
+def get_recommend_papers(conn: Connection, uname: str, count=10)\
+        -> tuple[int, Optional[list[Paper, ...]]]:
     """
     Recommended at most $count papers for a user.
 
@@ -566,8 +571,8 @@ def get_papers_by_tag(conn, tag, count = 10):
     return 1, None
 
 
-def get_papers_by_keyword(conn: psycopg.Connection[tuple[Any, ...]], keyword: str, count=10)\
-        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
+def get_papers_by_keyword(conn: Connection, keyword: str, count=10)\
+        -> tuple[int, Optional[list[Paper, ...]]]:
     """
     Get at most $count papers that match a keyword in its title, description *or* text field
 
