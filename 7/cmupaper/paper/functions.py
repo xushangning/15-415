@@ -391,7 +391,8 @@ def get_likes(conn: psycopg.Connection[tuple[Any, ...]], pid: int) -> tuple[int,
 # Search related
 
 
-def get_timeline(conn, uname, count = 10):
+def get_timeline(conn: psycopg.Connection[tuple[Any, ...]], uname: str, count=10)\
+        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
     """
     Get timeline of a user.
 
@@ -420,10 +421,25 @@ def get_timeline(conn, uname, count = 10):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT pid, username, title, begin_time, description FROM papers '
+            'WHERE username = %s ORDER BY begin_time DESC, pid LIMIT %s',
+            (uname, count)
+        )
+        papers = cursor.fetchall()
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        papers = None
+    return return_status, papers
 
 
-def get_timeline_all(conn, count = 10):
+def get_timeline_all(conn: psycopg.Connection[tuple[Any, ...]], count=10)\
+        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
     """
     Get at most $count recent papers
 
@@ -438,7 +454,21 @@ def get_timeline_all(conn, count = 10):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT pid, username, title, begin_time, description FROM papers '
+            'ORDER BY begin_time DESC, pid LIMIT %s',
+            (count,)
+        )
+        papers = cursor.fetchall()
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        papers = None
+    return return_status, papers
 
 
 def get_most_popular_papers(conn, begin_time, count = 10):
