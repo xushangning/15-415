@@ -471,7 +471,8 @@ def get_timeline_all(conn: psycopg.Connection[tuple[Any, ...]], count=10)\
     return return_status, papers
 
 
-def get_most_popular_papers(conn, begin_time, count = 10):
+def get_most_popular_papers(conn: psycopg.Connection[tuple[Any, ...]], begin_time: datetime, count=10)\
+        -> tuple[int, Optional[list[tuple[int, str, str, datetime, str], ...]]]:
     """
     Get at most $count papers posted after $begin_time according that have the most likes.
 
@@ -488,7 +489,23 @@ def get_most_popular_papers(conn, begin_time, count = 10):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT pid, username, title, begin_time, description FROM papers JOIN ('
+            'SELECT pid, COUNT(*) AS like_count FROM likes '
+            'WHERE pid IN (SELECT pid FROM papers WHERE begin_time > %s) GROUP BY pid'
+            ') AS t USING (pid) ORDER BY like_count DESC, pid LIMIT %s',
+            (begin_time, count)
+        )
+        papers = cursor.fetchall()
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        papers = None
+    return return_status, papers
 
 
 def get_recommend_papers(conn, uname, count = 10):
