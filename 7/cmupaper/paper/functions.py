@@ -791,7 +791,7 @@ def get_number_papers_user(conn: Connection, uname: str) -> tuple[int, Optional[
     return return_status, count
 
 
-def get_number_liked_user(conn, uname):
+def get_number_liked_user(conn: Connection, uname: str) -> tuple[int, Optional[int]]:
     """
     Get the number of likes liked by the user
 
@@ -803,7 +803,17 @@ def get_number_liked_user(conn, uname):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM likes WHERE username = %s', (uname,))
+        count = cursor.fetchone()[0]
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        count = None
+    return return_status, count
 
 
 def get_number_tags_user(conn, uname):
