@@ -397,7 +397,7 @@ def get_likes(conn: Connection, pid: int) -> tuple[int, Optional[int]]:
 
 
 def get_timeline(conn: Connection, uname: str, count=10)\
-        -> tuple[int, Optional[list[Paper, ...]]]:
+        -> tuple[int, Optional[list[Paper]]]:
     """
     Get timeline of a user.
 
@@ -444,7 +444,7 @@ def get_timeline(conn: Connection, uname: str, count=10)\
 
 
 def get_timeline_all(conn: Connection, count=10)\
-        -> tuple[int, Optional[list[Paper, ...]]]:
+        -> tuple[int, Optional[list[Paper]]]:
     """
     Get at most $count recent papers
 
@@ -477,7 +477,7 @@ def get_timeline_all(conn: Connection, count=10)\
 
 
 def get_most_popular_papers(conn: Connection, begin_time: datetime, count=10)\
-        -> tuple[int, Optional[list[Paper, ...]]]:
+        -> tuple[int, Optional[list[Paper]]]:
     """
     Get at most $count papers posted after $begin_time according that have the most likes.
 
@@ -514,7 +514,7 @@ def get_most_popular_papers(conn: Connection, begin_time: datetime, count=10)\
 
 
 def get_recommend_papers(conn: Connection, uname: str, count=10)\
-        -> tuple[int, Optional[list[Paper, ...]]]:
+        -> tuple[int, Optional[list[Paper]]]:
     """
     Recommended at most $count papers for a user.
 
@@ -552,7 +552,7 @@ def get_recommend_papers(conn: Connection, uname: str, count=10)\
     return return_status, papers
 
 
-def get_papers_by_tag(conn: Connection, tag: str, count=10) -> tuple[int, Optional[list[Paper, ...]]]:
+def get_papers_by_tag(conn: Connection, tag: str, count=10) -> tuple[int, Optional[list[Paper]]]:
     """
     Get at most $count papers that have the given tag
 
@@ -586,7 +586,7 @@ def get_papers_by_tag(conn: Connection, tag: str, count=10) -> tuple[int, Option
 
 
 def get_papers_by_keyword(conn: Connection, keyword: str, count=10)\
-        -> tuple[int, Optional[list[Paper, ...]]]:
+        -> tuple[int, Optional[list[Paper]]]:
     """
     Get at most $count papers that match a keyword in its title, description *or* text field
 
@@ -627,7 +627,7 @@ def get_papers_by_keyword(conn: Connection, keyword: str, count=10)\
     return return_status, papers
 
 
-def get_papers_by_liked(conn: Connection, uname: str, count=10) -> tuple[int, Optional[list[Paper, ...]]]:
+def get_papers_by_liked(conn: Connection, uname: str, count=10) -> tuple[int, Optional[list[Paper]]]:
     """
     Get at most $count papers that liked by the given user.
 
@@ -664,7 +664,7 @@ def get_papers_by_liked(conn: Connection, uname: str, count=10) -> tuple[int, Op
 # Statistics related
 
 
-def get_most_active_users(conn: Connection, count=1) -> tuple[int, Optional[list[str, ...]]]:
+def get_most_active_users(conn: Connection, count=1) -> tuple[int, Optional[list[str]]]:
     """
     Get at most $count users that post most papers.
 
@@ -697,7 +697,7 @@ def get_most_active_users(conn: Connection, count=1) -> tuple[int, Optional[list
     return return_status, users
 
 
-def get_most_popular_tags(conn: Connection, count=1) -> tuple[int, Optional[list[tuple[str, int], ...]]]:
+def get_most_popular_tags(conn: Connection, count=1) -> tuple[int, Optional[list[tuple[str, int]]]]:
     """
     Get at most $count many tags that gets most used among all papers
 
