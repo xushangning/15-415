@@ -766,7 +766,7 @@ def get_most_popular_tag_pairs(conn: Connection, count=1)\
     return return_status, tag_pairs_and_count
 
 
-def get_number_papers_user(conn, uname):
+def get_number_papers_user(conn: Connection, uname: str) -> tuple[int, Optional[int]]:
     """
     Get the number of papers posted by a given user.
 
@@ -778,7 +778,17 @@ def get_number_papers_user(conn, uname):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute('SELECT COUNT(*) FROM papers WHERE username = %s', (uname,))
+        count = cursor.fetchone()[0]
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        count = None
+    return return_status, count
 
 
 def get_number_liked_user(conn, uname):

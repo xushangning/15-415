@@ -377,7 +377,7 @@ class DbApiTestCase(TransactionTestCase):
 
         return_status, count = functions.get_number_papers_user(self._conn, self._uploader.username)
         self.assertEqual(return_status, 0)
-        self.assertEqual(count, len(papers))
+        self.assertEqual(count, len(papers) + 1)    # +1 for cls._paper
 
         return_status, count = functions.get_number_liked_user(self._conn, cindy.username)
         self.assertEqual(return_status, 0)
