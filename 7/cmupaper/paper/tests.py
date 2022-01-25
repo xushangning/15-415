@@ -370,9 +370,9 @@ class DbApiTestCase(TransactionTestCase):
         )
         self.assertEqual(return_status, 0)
         self.assertEqual(returned_tag_pairs, [
-            (tags[0].tagname, tags[1].tagname),
-            (tags[0].tagname, tags[2].tagname),
-            (tags[1].tagname, tags[2].tagname)
+            (tags[0].tagname, tags[1].tagname, 2),
+            (tags[0].tagname, tags[2].tagname, 1),
+            (tags[1].tagname, tags[2].tagname, 1)
         ])
 
         return_status, count = functions.get_number_papers_user(self._conn, self._uploader.username)

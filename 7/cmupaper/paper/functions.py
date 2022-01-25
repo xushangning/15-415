@@ -730,7 +730,8 @@ def get_most_popular_tags(conn: Connection, count=1) -> tuple[int, Optional[list
     return return_status, tags_and_count
 
 
-def get_most_popular_tag_pairs(conn, count = 1):
+def get_most_popular_tag_pairs(conn: Connection, count=1)\
+        -> tuple[int, Optional[list[tuple[str, str, int]]]]:
     """
     Get at most $count many tag pairs that have been used together.
 
@@ -747,7 +748,22 @@ def get_most_popular_tag_pairs(conn, count = 1):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT tags.tagname, t.tagname, COUNT(*) as pair_count '
+            'FROM tags, tags AS t WHERE tags.pid = t.pid AND tags.tagname < t.tagname '
+            'GROUP BY tags.tagname, t.tagname ORDER BY pair_count DESC, tags.tagname, t.tagname LIMIT %s',
+            (count,)
+        )
+        tag_pairs_and_count = cursor.fetchall()
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        tag_pairs_and_count = None
+    return return_status, tag_pairs_and_count
 
 
 def get_number_papers_user(conn, uname):
