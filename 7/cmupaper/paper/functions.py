@@ -816,7 +816,7 @@ def get_number_liked_user(conn: Connection, uname: str) -> tuple[int, Optional[i
     return return_status, count
 
 
-def get_number_tags_user(conn, uname):
+def get_number_tags_user(conn: Connection, uname: str) -> tuple[int, Optional[int]]:
     """
     Get the number of distinct tagnames used by the user.
 
@@ -830,5 +830,19 @@ def get_number_tags_user(conn, uname):
         (1, None)
             Failure
     """
-    return 1, None
+    return_status = 1
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT COUNT(DISTINCT tagname) FROM tags JOIN papers USING (pid) '
+            'WHERE username = %s',
+            (uname,)
+        )
+        count = cursor.fetchone()[0]
+        conn.commit()
+        return_status = 0
+    except Exception:
+        conn.rollback()
+        count = None
+    return return_status, count
 
