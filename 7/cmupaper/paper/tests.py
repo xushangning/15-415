@@ -199,11 +199,9 @@ class DbApiEmptyTableTestCase(DbApiTestCase):
                 pid=test_paper,
                 tagname=models.TagName.objects.create(tagname=tag)
             )
-        return_status, returned_tags = functions.get_paper_tags(self._conn, test_paper.pid)
-        self.assertEqual(return_status, 0)
         # Returned tags should be sorted in lexicographical order.
         tags.sort()
-        self.assertTrue(tags == returned_tags)
+        self.assertEqual(functions.get_paper_tags(self._conn, test_paper.pid), (0, tags))
 
     def test_liking_paper(self):
         self._uploader.save()
@@ -234,31 +232,18 @@ class DbApiEmptyTableTestCase(DbApiTestCase):
         """Test stats-related APIs on empty tables."""
         self._uploader.save()
 
-        return_status, returned_papers = functions.get_timeline(self._conn, self._uploader.username)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(len(returned_papers), 0)
-        return_status, returned_papers = functions.get_timeline_all(self._conn)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(len(returned_papers), 0)
+        self.assertEqual(functions.get_timeline(self._conn, self._uploader.username), (0, []))
+        self.assertEqual(functions.get_timeline_all(self._conn), (0, []))
 
-        return_status, returned_papers = functions.get_papers_by_keyword(self._conn, '4')
-        self.assertEqual(return_status, 0)
-        self.assertEqual(len(returned_papers), 0)
+        self.assertEqual(functions.get_papers_by_keyword(self._conn, '4'), (0, []))
 
         # No likes.
         self._paper.save()
-        return_status, likes = functions.get_likes(self._conn, self._paper.pid)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(likes, 0)
+        self.assertEqual(functions.get_likes(self._conn, self._paper.pid), (0, 0))
 
         # A tag attached to no papers
         test_tag = models.TagName.objects.create(tagname='test')
-        return_status, returned_papers = functions.get_papers_by_tag(
-            self._conn,
-            test_tag.tagname
-        )
-        self.assertEqual(return_status, 0)
-        self.assertEqual(len(returned_papers), 0)
+        self.assertEqual(functions.get_papers_by_tag(self._conn, test_tag.tagname), (0, []))
 
 
 class DbApiAnalyticsTestCase(DbApiTestCase):
@@ -318,15 +303,11 @@ class DbApiAnalyticsTestCase(DbApiTestCase):
         models.Tag.objects.create(pid=cls._papers[1], tagname=cls._tags[2])
 
     def test_get_likes(self):
-        return_status, likes = functions.get_likes(self._conn, self._papers[0].pid)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(likes, 3)
+        self.assertEqual(functions.get_likes(self._conn, self._papers[0].pid), (0, 3))
 
     def test_timeline(self):
         return_status, returned_papers = functions.get_timeline(
-            self._conn,
-            self._uploader.username,
-            count=3
+            self._conn, self._uploader.username, count=3
         )
         self.assertEqual(return_status, 0)
         # Check papers are returned in chronological order (most recent first).
@@ -342,8 +323,7 @@ class DbApiAnalyticsTestCase(DbApiTestCase):
 
     def test_get_most_popular_papers(self):
         return_status, returned_papers = functions.get_most_popular_papers(
-            self._conn,
-            begin_time=self._papers[0].begin_time.replace(tzinfo=None)
+            self._conn, begin_time=self._papers[0].begin_time.replace(tzinfo=None)
         )
         self.assertEqual(return_status, 0)
         # Check papers are returned in descending order of the number of likes,
@@ -386,37 +366,35 @@ class DbApiAnalyticsTestCase(DbApiTestCase):
         self.assertEqual(returned_papers[1][2], self._papers[1].title)
 
     def test_get_most_active_users(self):
-        return_status, returned_users = functions.get_most_active_users(self._conn, count=10)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(returned_users, [self._uploader.username])
+        self.assertEqual(
+            functions.get_most_active_users(self._conn, count=10),
+            (0, [self._uploader.username])
+        )
 
     def test_get_most_popular_tags(self):
-        return_status, returned_tags = functions.get_most_popular_tags(self._conn, count=2)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(returned_tags, [(self._tags[0].tagname, 4), (self._tags[1].tagname, 2)])
+        self.assertEqual(
+            functions.get_most_popular_tags(self._conn, count=2),
+            (0, [(self._tags[0].tagname, 4), (self._tags[1].tagname, 2)])
+        )
 
     def test_get_most_popular_tag_pairs(self):
-        return_status, returned_tag_pairs = functions.get_most_popular_tag_pairs(
-            self._conn, count=3
+        self.assertEqual(
+            functions.get_most_popular_tag_pairs(self._conn, count=3),
+            (0, [
+                (self._tags[0].tagname, self._tags[1].tagname, 2),
+                (self._tags[0].tagname, self._tags[2].tagname, 1),
+                (self._tags[1].tagname, self._tags[2].tagname, 1)
+            ])
         )
-        self.assertEqual(return_status, 0)
-        self.assertEqual(returned_tag_pairs, [
-            (self._tags[0].tagname, self._tags[1].tagname, 2),
-            (self._tags[0].tagname, self._tags[2].tagname, 1),
-            (self._tags[1].tagname, self._tags[2].tagname, 1)
-        ])
 
     def test_get_number_papers_user(self):
-        return_status, count = functions.get_number_papers_user(self._conn, self._uploader.username)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(count, len(self._papers) + 1)    # +1 for cls._paper
+        self.assertEqual(
+            functions.get_number_papers_user(self._conn, self._uploader.username),
+            (0, len(self._papers) + 1)
+        )
 
     def test_get_number_likes_user(self):
-        return_status, count = functions.get_number_liked_user(self._conn, self._cindy.username)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(count, 2)
+        self.assertEqual(functions.get_number_liked_user(self._conn, self._cindy.username), (0, 2))
 
     def test_get_number_tags_user(self):
-        return_status, count = functions.get_number_tags_user(self._conn, self._uploader.username)
-        self.assertEqual(return_status, 0)
-        self.assertEqual(count, 3)
+        self.assertEqual(functions.get_number_tags_user(self._conn, self._uploader.username), (0, 3))
